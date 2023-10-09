@@ -18,17 +18,6 @@ import json
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print(device)
-#-----------------------------Hard coding section-will be changed to config file----------------------------------
-num_workers = 3
-batch_size = 16
-log_epoch=10
-factor =0.5
-threshold=0.03
-momentum =0.9
-weight_decay =5e-4
-seed=42
-save_model=True
-eval_function=["MAE","ACC", "R2S"]
 #-----------------------------------------------------------------------------------------------------------------
 
 parser=argparse.ArgumentParser(description='training pipeline for image classification')
@@ -38,11 +27,34 @@ parser.add_argument('--name', default ='proto', type=str)  # experiment 이름 �
 parser.add_argument('--model_cfgs', default='configs/model_cfgs.json', type=str)  # 
 parser.add_argument('--mode', default='train', type=str, choices=('train', 'test')) # 학습모드 / 평가모드
 parser.add_argument('--epochs', default=10, type=int)  #epochs
+parser.add_argument('--log_epoch', default=10, type=int)  # save model per log epochs
 parser.add_argument('--lr', '--learning_rate', default=1e-5, type=float)  # learning rate
 parser.add_argument('--data_path', default='/home/work/deeplant_data', type=str)  # data path
 args=parser.parse_args()
 
 # -----------------------------------------------------------------------------------------------------------------
+# Read Model's configs
+with open(args.model_cfgs, 'r') as json_file:
+    model_cfgs = json.load(json_file)
+
+#Define hyperparameters
+params = model_cfgs['hyperparameters']
+
+num_workers = params['num_workers']
+batch_size = params['batch_size']
+factor = params['factor']
+threshold = params['threshold']
+momentum = params['momentum']
+weight_decay = params['weight_decay']
+seed = params['seed']
+save_model = params['save_model']
+eval_function = params['eval_function']
+
+epochs = args.epochs
+lr = args.lr
+experiment_name = args.name
+run_name = args.run
+log_epoch = args.log_epoch
 
 #Define data pathes
 datapath = args.data_path
@@ -54,9 +66,6 @@ test_set.reset_index(inplace=True, drop=True)
 print(train_set)
 print(test_set)
 
-# Read Model's configs
-with open(args.model_cfgs, 'r') as json_file:
-    model_cfgs = json.load(json_file)
 
 output_columns = model_cfgs['output_columns']
 columns_name = label_set.columns[output_columns].values
@@ -65,12 +74,6 @@ print(columns_name)
 #Define Data loader
 train_dataset = dataset.CreateImageDataset(train_set, datapath, model_cfgs['datasets'], output_columns, train=True)
 test_dataset = dataset.CreateImageDataset(test_set, datapath, model_cfgs['datasets'], output_columns, train=False)
-
-#Define hyperparameters
-epochs = args.epochs
-lr = args.lr
-experiment_name = args.name
-run_name = args.run
 
 # ------------------------------------------------------
 

@@ -1,5 +1,15 @@
-
 {
+    "hyperparameters":{
+        "num_workers":3,
+        "batch_size":16,
+        "factor":0.5,
+        "threshold":0.03,
+        "momentum":0.9,
+        "weight_decay":5e-4,
+        "seed":42,
+        "save_model":true,
+        "eval_function":["MAE","ACC","R2S"]
+    },
     "models":{
         "module":"models.graph_channel",
         "model_name":null,
