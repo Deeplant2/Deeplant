@@ -8,7 +8,8 @@
         "weight_decay":5e-4,
         "seed":42,
         "save_model":true,
-        "eval_function":["MAE","ACC","R2S"]
+        "eval_function":["MAE","ACC","R2S"],
+        "cross_validation":0
     },
     "models":{
         "module":"models.graph_channel",

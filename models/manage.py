@@ -2,11 +2,14 @@ import torch
 import mlflow
 import os
 import gc
+import numpy as np
 import pandas as pd
 
 from torch.utils.data import DataLoader
+from torch.utils.data import random_split, SubsetRandomSampler
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import KFold
 
 from torch import optim
 
@@ -49,6 +52,7 @@ weight_decay = params['weight_decay']
 seed = params['seed']
 save_model = params['save_model']
 eval_function = params['eval_function']
+cross_validation = params['cross_validation']
 
 epochs = args.epochs
 lr = args.lr
@@ -60,20 +64,24 @@ log_epoch = args.log_epoch
 datapath = args.data_path
 label_set = pd.read_csv(os.path.join(datapath,'new_train.csv'))
 
-train_set, test_set = train_test_split(label_set, test_size =0.1, random_state = seed)
-train_set.reset_index(inplace=True, drop=True)
-test_set.reset_index(inplace=True, drop=True)
-print(train_set)
-print(test_set)
-
-
 output_columns = model_cfgs['output_columns']
 columns_name = label_set.columns[output_columns].values
 print(columns_name)
 
 #Define Data loader
-train_dataset = dataset.CreateImageDataset(train_set, datapath, model_cfgs['datasets'], output_columns, train=True)
-test_dataset = dataset.CreateImageDataset(test_set, datapath, model_cfgs['datasets'], output_columns, train=False)
+
+if cross_validation is 0:
+    train_set, test_set = train_test_split(label_set, test_size=0.1, random_state=seed)
+    train_set.reset_index(inplace=True, drop=True)
+    test_set.reset_index(inplace=True, drop=True)
+    print(train_set)
+    print(test_set)
+
+    train_dataset = dataset.CreateImageDataset(train_set, datapath, model_cfgs['datasets'], output_columns, train=True)
+    test_dataset = dataset.CreateImageDataset(test_set, datapath, model_cfgs['datasets'], output_columns, train=False)
+else:
+    cross_dataset = dataset.CreateImageDataset(label_set, datapath, model_cfgs['datasets'], output_columns, train=True)
+    splits = KFold(n_splits = cross_validation, shuffle = True, random_state = 42)
 
 # ------------------------------------------------------
 
@@ -88,38 +96,76 @@ with mlflow.start_run(run_name=run_name) as parent_run:
     mlflow.log_param("learning_rate", lr)
 
     if args.mode =='train':
-        model = m.create_model(model_cfgs)
-        model = model.to(device)
-        total_params = sum(p.numel() for p in model.parameters())
-        mlflow.log_param("total_parmas", total_params)
+        if cross_validation is 0:
+            model = m.create_model(model_cfgs)
+            model = model.to(device)
+            total_params = sum(p.numel() for p in model.parameters())
+            mlflow.log_param("total_parmas", total_params)
 
-        optimizer = optim.Adam(model.parameters(), lr = lr)
-        scheduler = ReduceLROnPlateau(optimizer, patience = 2, factor = factor, threshold = threshold)
-        train_dl = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
-        val_dl = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
+            optimizer = optim.Adam(model.parameters(), lr = lr)
+            scheduler = ReduceLROnPlateau(optimizer, patience = 2, factor = factor, threshold = threshold)
+            train_dl = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
+            val_dl = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
 
-        params_train = {
-        'num_epochs':epochs,
-        'optimizer':optimizer,
-        'train_dl':train_dl,
-        'val_dl':val_dl,
-        'lr_scheduler':scheduler,
-        'log_epoch':log_epoch,
-        'num_classes':len(model_cfgs['output_columns']),
-        'columns_name':columns_name,
-        'eval_function':eval_function,
-        'save_model':save_model
-        }
+            params_train = {
+            'num_epochs':epochs,
+            'optimizer':optimizer,
+            'train_dl':train_dl,
+            'val_dl':val_dl,
+            'lr_scheduler':scheduler,
+            'log_epoch':log_epoch,
+            'num_classes':len(model_cfgs['output_columns']),
+            'columns_name':columns_name,
+            'eval_function':eval_function,
+            'save_model':save_model
+            }
+            
+            algorithm = model.getAlgorithm()
+            
+            if algorithm == 'classification':
+                model, train_acc, val_acc, train_loss, val_loss = train.classification(model, params_train)
+            elif algorithm == 'regression':
+                model, train_acc, val_acc, train_loss, val_loss, r2_score, train_mae, val_mae = train.regression(model, params_train)
+               
+            model.cpu()
+            del model
+            gc.collect()
+
+        else:
+            for fold, (train_idx,val_idx) in enumerate(splits.split(np.arange(len(dataset)))):
+                model = m.create_model(model_cfgs)
+                model = model.to(device)
+
+                optimizer = optim.Adam(model.parameters(), lr = lr)
+                scheduler = ReduceLROnPlateau(optimizer, patience = 2, factor = factor, threshold = threshold)
+                train_sampler = SubsetRandomSampler(train_idx) 
+                test_sampler = SubsetRandomSampler(val_idx)
+                train_dl = DataLoader(cross_dataset, batch_size=batch_size, sampler=train_sampler, num_workers=num_workers, pin_memory=True)
+                val_dl = DataLoader(cross_dataset, batch_size=batch_size, sampler=test_sampler, num_workers=num_workers, pin_memory=True)
+                params_train = {
+                'num_epochs':epochs,
+                'optimizer':optimizer,
+                'train_dl':train_dl,
+                'val_dl':val_dl,
+                'lr_scheduler':scheduler,
+                'log_epoch':log_epoch,
+                'num_classes':len(model_cfgs['output_columns']),
+                'columns_name':columns_name,
+                'eval_function':eval_function,
+                'save_model':save_model
+                }
+                
+                algorithm = model.getAlgorithm()
+                with mlflow.start_run(run_name=str(fold+1), nested=True) as run:
+                    if algorithm == 'classification':
+                        model, train_acc, val_acc, train_loss, val_loss = train.classification(model, params_train)
+                    elif algorithm == 'regression':
+                        model, train_acc, val_acc, train_loss, val_loss, r2_score = train.regression(model, params_train)
+
+                    
+                model.cpu()
+                del model
+                gc.collect()
         
-        algorithm = model.getAlgorithm()
-        
-        if algorithm == 'classification':
-             model, train_acc, val_acc, train_loss, val_loss = train.classification(model, params_train)
-        elif algorithm == 'regression':
-             model, train_acc, val_acc, train_loss, val_loss, r2_score, train_mae, val_mae = train.regression(model, params_train)
-
-    model.cpu()
-    del model
-    gc.collect()
 
 torch.cuda.empty_cache()
