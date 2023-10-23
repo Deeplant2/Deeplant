@@ -15,7 +15,8 @@ from torch import optim
 
 import train
 import models.make_model as m
-import models.dataset as dataset
+import utils.dataset as dataset
+import utils.log as log
 import argparse
 import json
 
@@ -68,19 +69,18 @@ output_columns = model_cfgs['output_columns']
 columns_name = label_set.columns[output_columns].values
 print(columns_name)
 
-#Define Data loader
+# Define Data loader
 
-if cross_validation is 0:
+if cross_validation == 0:
     train_set, test_set = train_test_split(label_set, test_size=0.1, random_state=seed)
     train_set.reset_index(inplace=True, drop=True)
     test_set.reset_index(inplace=True, drop=True)
     print(train_set)
     print(test_set)
 
-    train_dataset = dataset.CreateImageDataset(train_set, datapath, model_cfgs['datasets'], output_columns, train=True)
-    test_dataset = dataset.CreateImageDataset(test_set, datapath, model_cfgs['datasets'], output_columns, train=False)
+    train_dataset = dataset.CreateImageDataset(train_set, datapath, model_cfgs['datasets'], output_columns)
+    test_dataset = dataset.CreateImageDataset(test_set, datapath, model_cfgs['datasets'], output_columns)
 else:
-    cross_dataset = dataset.CreateImageDataset(label_set, datapath, model_cfgs['datasets'], output_columns, train=True)
     splits = KFold(n_splits = cross_validation, shuffle = True, random_state = 42)
 
 # ------------------------------------------------------
@@ -96,7 +96,7 @@ with mlflow.start_run(run_name=run_name) as parent_run:
     mlflow.log_param("learning_rate", lr)
 
     if args.mode =='train':
-        if cross_validation is 0:
+        if cross_validation == 0:
             model = m.create_model(model_cfgs)
             model = model.to(device)
             total_params = sum(p.numel() for p in model.parameters())
@@ -117,31 +117,34 @@ with mlflow.start_run(run_name=run_name) as parent_run:
             'num_classes':len(model_cfgs['output_columns']),
             'columns_name':columns_name,
             'eval_function':eval_function,
-            'save_model':save_model
+            'save_model':save_model,
             }
             
             algorithm = model.getAlgorithm()
             
             if algorithm == 'classification':
-                model, train_acc, val_acc, train_loss, val_loss = train.classification(model, params_train)
+                model, _, _, _, _ = train.classification(model, params_train)
             elif algorithm == 'regression':
-                model, train_acc, val_acc, train_loss, val_loss, r2_score, train_mae, val_mae = train.regression(model, params_train)
+                model, _, _, _, _ = train.regression(model, params_train)
                
             model.cpu()
             del model
             gc.collect()
 
         else:
-            for fold, (train_idx,val_idx) in enumerate(splits.split(np.arange(len(dataset)))):
+            train_loss_list, val_loss_list, train_metric_list, val_metric_list = [],[],[],[]
+            for fold, (train_idx,val_idx) in enumerate(splits.split(np.arange(len(label_set)))):
                 model = m.create_model(model_cfgs)
                 model = model.to(device)
 
                 optimizer = optim.Adam(model.parameters(), lr = lr)
                 scheduler = ReduceLROnPlateau(optimizer, patience = 2, factor = factor, threshold = threshold)
-                train_sampler = SubsetRandomSampler(train_idx) 
-                test_sampler = SubsetRandomSampler(val_idx)
-                train_dl = DataLoader(cross_dataset, batch_size=batch_size, sampler=train_sampler, num_workers=num_workers, pin_memory=True)
-                val_dl = DataLoader(cross_dataset, batch_size=batch_size, sampler=test_sampler, num_workers=num_workers, pin_memory=True)
+                train_dataset = dataset.CreateImageDataset(label_set.iloc[train_idx], datapath, model_cfgs['datasets'], output_columns, train=True)
+                val_dataset = dataset.CreateImageDataset(label_set.iloc[val_idx], datapath, model_cfgs['datasets'], output_columns, train=False)
+                train_dl = DataLoader(train_dataset, batch_size=batch_size, num_workers=num_workers, pin_memory=True)
+                val_dl = DataLoader(val_dataset, batch_size=batch_size, num_workers=num_workers, pin_memory=True)
+                print(label_set.iloc[train_idx])
+                print(label_set.iloc[val_idx])
                 params_train = {
                 'num_epochs':epochs,
                 'optimizer':optimizer,
@@ -152,20 +155,24 @@ with mlflow.start_run(run_name=run_name) as parent_run:
                 'num_classes':len(model_cfgs['output_columns']),
                 'columns_name':columns_name,
                 'eval_function':eval_function,
-                'save_model':save_model
+                'save_model':save_model,
                 }
                 
                 algorithm = model.getAlgorithm()
                 with mlflow.start_run(run_name=str(fold+1), nested=True) as run:
                     if algorithm == 'classification':
-                        model, train_acc, val_acc, train_loss, val_loss = train.classification(model, params_train)
+                        model, train_loss, val_loss, train_metric, val_metric = train.classification(model, params_train)
                     elif algorithm == 'regression':
-                        model, train_acc, val_acc, train_loss, val_loss, r2_score = train.regression(model, params_train)
-
-                    
+                        model, train_loss, val_loss, train_metric, val_metric = train.regression(model, params_train)
+                train_loss_list.append(train_loss)
+                val_loss_list.append(val_loss)
+                train_metric_list.append(train_metric)
+                val_metric_list .append(val_metric)
                 model.cpu()
                 del model
                 gc.collect()
-        
+            log.logFoldMean(train_loss_list, val_loss_list, train_metric_list, val_metric_list, eval_function, columns_name)
+
+
 
 torch.cuda.empty_cache()

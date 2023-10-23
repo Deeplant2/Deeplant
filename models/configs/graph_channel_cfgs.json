@@ -9,7 +9,7 @@
         "seed":42,
         "save_model":true,
         "eval_function":["MAE","ACC","R2S"],
-        "cross_validation":0
+        "cross_validation":10
     },
     "models":{
         "module":"models.graph_channel",
@@ -23,13 +23,45 @@
             "image_size":448,
             "isImage":true,
             "input_column": 13,
-            "graph":null
+            "graph":null,
+            "train_transform":{
+                "Resize":[448,448],
+                "RandomHorizontalFlip":0.5,
+                "RandomVerticalFlip":0.5,
+                "RandomRotation":[-180,180],
+                "Grayscale":null,
+                "ToTensor":true
+            },
+            "val_transform":{
+                "Resize":[448,448],
+                "RandomHorizontalFlip":null,
+                "RandomVerticalFlip":null,
+                "RandomRotation":null,
+                "Grayscale":null,
+                "ToTensor":true
+            }
         },
         {
             "image_size":448,
             "isImage":false,
             "input_column": null,
-            "graph":"gsurface"
+            "graph":"gsurface",
+            "train_transform":{
+                "Resize":[448,448],
+                "RandomHorizontalFlip":null,
+                "RandomVerticalFlip":null,
+                "RandomRotation":null,
+                "Grayscale":1,
+                "ToTensor":true
+            },
+            "val_transform":{
+                "Resize":[448,448],
+                "RandomHorizontalFlip":null,
+                "RandomVerticalFlip":null,
+                "RandomRotation":null,
+                "Grayscale":1,
+                "ToTensor":true
+            }
         }
 
     ],

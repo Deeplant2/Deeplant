@@ -29,6 +29,13 @@ class Accuracy():
     def getResult(self):
         return self.cumulative_metric / self.length
     
+    def getDictResult(self):
+        result = getResult()
+        dict_result = {}
+        for i in range(self.num_classes):
+            result[self.columns_name[i]] = result[i]
+        return dict_result
+    
     def getClassName(self):
         return "accuracy"
     
@@ -64,6 +71,9 @@ class R2score():
         r2_score = (1 - (ssr / sst)).mean()
         return r2_score
     
+    def getDictResult(self):
+        return getResult()
+    
     def getClassName(self):
         return "r2score"
     
@@ -89,11 +99,18 @@ class MeanAbsError():
     def getResult(self):
         return self.cumulative_metric / self.length
     
+    def getDictResult(self):
+        result = getResult()
+        dict_result = {}
+        for i in range(self.num_classes):
+            result[self.columns_name[i]] = result[i]
+        return dict_result
+    
     def getClassName(self):
         return "mae"
     
     def logMetric(self, mode, epoch):
-        result = self.getResult()
+        result = self.cumulative_metric / self.length
         for i in range(self.num_classes):
             mlflow.log_metric(f"{mode} mae {self.columns_name[i]}", result[i], epoch)
 
@@ -119,6 +136,18 @@ class Metrics():
     def logMetrics(self, mode, epoch):
         for metric in self.metrics:
             metric.logMetric(mode, epoch)
+            
+    def getResults(self):
+        result = []
+        for metric in self.metrics:
+            result.append(metric.getResult())
+        return result 
+    
+    def getDictResults(self):
+        result = {}
+        for i in range(len(self.metrics)):
+            result[self.metrics[i].getClassName()] = self.metrics[i].getDictResult()
+        return result
 
 
 

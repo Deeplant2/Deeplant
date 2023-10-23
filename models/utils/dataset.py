@@ -1,15 +1,14 @@
 import torch
 import os
-from torchvision import transforms
 from PIL import Image
 from torch.utils.data import Dataset
 import utils.image_dist as imdi
+import utils.transform as transform
 
 class CreateImageDataset(Dataset):
     def __init__(self, labels, img_dir, dataset_cfgs, output_columns, train=True):
 
-        self.train_transforms = []
-        self.test_transforms = []
+        self.train_transforms, self.val_transforms = transform.create_transform(dataset_cfgs)
         self.image_sizes = []
         self.isImage = []
         self.input_columns = []
@@ -22,23 +21,6 @@ class CreateImageDataset(Dataset):
             isImage = dataset_cfg['isImage']
             input_column = dataset_cfg['input_column']
             graph = dataset_cfg['graph']
-            
-            
-            train_transform = transforms.Compose([
-            transforms.Resize([image_size,image_size]),
-            transforms.RandomHorizontalFlip(p=0.5),
-            transforms.RandomVerticalFlip(p=0.5),
-            transforms.RandomRotation((-180,180)),
-            transforms.ToTensor(),
-            ])
-
-            test_transform = transforms.Compose([
-            transforms.Resize([image_size,image_size]),
-            transforms.ToTensor(),
-            ])
-
-            self.train_transforms.append(train_transform)
-            self.test_transforms.append(test_transform)
             self.image_sizes.append(image_size)
             self.isImage.append(isImage)
             self.graph.append(graph)
@@ -47,7 +29,8 @@ class CreateImageDataset(Dataset):
         self.img_dir = img_dir
         self.img_labels = labels
         self.train = train
-
+        
+        
     def __len__(self):
         return len(self.img_labels)
 
@@ -63,19 +46,23 @@ class CreateImageDataset(Dataset):
                 if self.train:
                     image = self.train_transforms[i](image)
                 else:
-                    image = self.test_transforms[i](image)
+                    image = self.val_transforms[i](image)
                 inputs.append(image)
                 
             elif self.graph is not None:
-                graph_transform = transforms.Compose([
-                    transforms.Resize([self.image_sizes[i],self.image_sizes[i]]),
-                    transforms.Grayscale(num_output_channels=1),
-                    transforms.ToTensor(),
-                ])
+#                 graph_transform = transforms.Compose([
+#                     transforms.Resize([self.image_sizes[i],self.image_sizes[i]]),
+#                     transforms.Grayscale(num_output_channels=1),
+#                     transforms.ToTensor(),
+#                 ])
                 
                 grade = self.img_labels.iloc[idx]['Rank']
                 graph = self.openGraph(self.graph[i], grade, idx, i)
-                graph = graph_transform(graph)
+#                 graph = graph_transform(graph)
+                if self.train:
+                    graph = self.train_transforms[i](graph)
+                else:
+                    graph = self.val_transforms[i](graph)
                 inputs.append(graph)
 
             else:
