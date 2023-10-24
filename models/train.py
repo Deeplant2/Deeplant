@@ -1,17 +1,20 @@
+# +
 import torch
 import mlflow
-from tqdm import tqdm
-import utils.analyze as analyze
 import numpy as np
-from torch import nn
 import metric as f
+import utils.analyze as analyze
 import utils.analyze_regression as analyze_r
+
+from tqdm import tqdm
+from torch import nn
+# -
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def classification(model, params):
     num_epochs=params['num_epochs']
-    loss_func=nn.CrossEntropyLoss()
+    loss_func=params['loss_func']
     optimizer=params['optimizer']
     scheduler=params['lr_scheduler']
     log_epoch=params['log_epoch']
@@ -96,13 +99,13 @@ def classification_epoch(model, loss_func, dataset_dl, epoch, eval_function, num
         confusion_matrix.saveConfusionMatrix(epoch=epoch)
         incorrect_output.saveIncorrectOutput(filename="incorrect_output.csv", epoch=epoch)
 
-    loss = running_loss / len_data
+    loss = running_loss / len(dataset_dl)
     return loss, metrics
 
 
 def regression(model, params):
     num_epochs=params['num_epochs']
-    loss_func=nn.MSELoss()
+    loss_func=params['loss_func']
     optimizer=params['optimizer']
     scheduler=params['lr_scheduler']
     log_epoch=params['log_epoch']
@@ -154,27 +157,19 @@ def regression_epoch(model, loss_func, dataset_dl, epoch, num_classes, columns_n
         yb = yb.to(device)
         output = model(xb)
         
-        total_loss = 0.0
-        # class가 1개일 때 개별 라벨이 list 형식아니라서 for문을 못 돌림. 그래서 일단 구분함.
-        if num_classes != 1:
-            for i in range(num_classes):
-                loss_b = loss_func(output[:, i], yb[:, i])
-                total_loss += loss_b
-        else:
-            loss_b = loss_func(output, yb)
-            total_loss += loss_b
-
-        running_loss += total_loss.item()
+        loss = loss_func(output, yb)
+        running_loss += loss.item()
+        
         output_log.updateOutputLog(output, yb, name_b)
         metrics.update(output, yb)
 
         if opt is not None:
             opt.zero_grad()
-            total_loss.backward()
+            loss.backward()
             opt.step()        
         
     output_log.saveOutputLog(epoch, opt)
-    loss = running_loss / len_data
+    loss = running_loss / len(dataset_dl)
     return loss, metrics
 
 
