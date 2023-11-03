@@ -63,7 +63,7 @@ class CreateImageDataset(Dataset):
                     graph = self.train_transforms[i](graph)
                 else:
                     graph = self.val_transforms[i](graph)
-                inputs.append(graph)
+                inputs.append(graph[0:3])
 
             else:
                 input = torch.tensor(self.img_labels.iloc[idx, self.input_columns[i]], dtype=torch.float32)
@@ -85,10 +85,20 @@ class CreateImageDataset(Dataset):
         elif graph == 'gtotal':
             temp = Image.open(f'utils/kde/kde_Total_{grade}.png')
         elif graph == 'color':
+            temp = Image.open(f'utils/kde/kde_Color.png')
+        elif graph == 'surface':
+            temp = Image.open(f'utils/kde/kde_Surface Moisture.png')
+        elif graph == 'texture':
+            temp = Image.open(f'utils/kde/kde_Texture.png')
+        elif graph == 'marbling':
+            temp = Image.open(f'utils/kde/kde_Marbling.png')
+        elif graph == 'total':
+            temp = Image.open(f'utils/kde/kde_Total.png')
+        elif graph == 'pcolor':
             name = self.img_labels.iloc[idx, self.input_columns[i]]
             img_path = os.path.join(self.img_dir, name)
             temp = imdi.drawColorGraph(img_path)
-        elif graph == 'gray':
+        elif graph == 'pgray':
             name = self.img_labels.iloc[idx, self.input_columns[i]]
             img_path = os.path.join(self.img_dir, name)
             temp = imdi.drawGrayGraph(img_path)

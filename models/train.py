@@ -23,19 +23,20 @@ def classification(model, params):
     columns_name=params['columns_name']
     eval_function=params['eval_function']
     save_model=params['save_model']
+    sanity=params['sanity']
 
     train_loss_list, val_loss_list, train_metric_list, val_metric_list =[], [], [], []
     for epoch in tqdm(range(num_epochs)):
 
         #training
         model.train()
-        train_loss, train_metrics = classification_epoch(model, loss_func, train_dl, epoch, eval_function, 1, columns_name, optimizer)
+        train_loss, train_metrics = classification_epoch(model, loss_func, train_dl, epoch, eval_function, 1, columns_name, sanity, optimizer)
         train_loss_list.append(train_loss)
         train_metric_list.append(train_metrics.getResults())
         #validation
         model.eval()
         with torch.no_grad():
-            val_loss, val_metrics= classification_epoch(model, loss_func, val_dl, epoch, eval_function, 1, columns_name)
+            val_loss, val_metrics= classification_epoch(model, loss_func, val_dl, epoch, eval_function, 1, columns_name, sanity)
         scheduler.step(val_loss)
         val_loss_list.append(val_loss)
         val_metric_list.append(val_metrics.getResults())
@@ -54,7 +55,7 @@ def classification(model, params):
 
 
 # calculate the loss per epochs
-def classification_epoch(model, loss_func, dataset_dl, epoch, eval_function, num_classes, columns_name, sanity_check=False, opt=None):
+def classification_epoch(model, loss_func, dataset_dl, epoch, eval_function, num_classes, columns_name, sanity=False, opt=None):
     running_loss = 0.0
     len_data = len(dataset_dl.sampler)
 
@@ -91,7 +92,7 @@ def classification_epoch(model, loss_func, dataset_dl, epoch, eval_function, num
             confusion_matrix.updateConfusionMatrix(output, yb)
             incorrect_output.updateIncorrectOutput(output, yb, name_b)
 
-        if sanity_check is True:
+        if sanity is True:
             break
 
     # Validation
@@ -115,21 +116,22 @@ def regression(model, params):
     columns_name=params['columns_name']
     eval_function=params['eval_function']
     save_model=params['save_model']
-
+    sanity=params['sanity']
+    
     train_loss_list, val_loss_list, train_metric_list, val_metric_list =[], [], [], []
     best_loss = -1.0
     for epoch in tqdm(range(num_epochs)):
         
         #training
         model.train()
-        train_loss, train_metrics = regression_epoch(model, loss_func, train_dl, epoch, num_classes, columns_name, eval_function, optimizer)
+        train_loss, train_metrics = regression_epoch(model, loss_func, train_dl, epoch, num_classes, columns_name, eval_function, sanity, optimizer)
         train_loss_list.append(train_loss)
         train_metric_list.append(train_metrics.getResults())
         
         #validation
         model.eval()
         with torch.no_grad():
-            val_loss, val_metrics = regression_epoch(model, loss_func, val_dl, epoch, num_classes, columns_name, eval_function)
+            val_loss, val_metrics = regression_epoch(model, loss_func, val_dl, epoch, num_classes, columns_name, eval_function, sanity)
         scheduler.step(val_loss)
         val_loss_list.append(val_loss)
         val_metric_list.append(val_metrics.getResults())
@@ -147,7 +149,7 @@ def regression(model, params):
 
 
 # calculate the loss per epochs
-def regression_epoch(model, loss_func, dataset_dl, epoch, num_classes, columns_name, eval_function, opt=None):
+def regression_epoch(model, loss_func, dataset_dl, epoch, num_classes, columns_name, eval_function, sanity=False, opt=None):
     running_loss = 0.0
     len_data = len(dataset_dl.sampler)
     metrics = f.Metrics(eval_function, num_classes, 'regression', len_data, columns_name)
@@ -166,7 +168,10 @@ def regression_epoch(model, loss_func, dataset_dl, epoch, num_classes, columns_n
         if opt is not None:
             opt.zero_grad()
             loss.backward()
-            opt.step()        
+            opt.step()     
+            
+        if sanity is True:
+            break
         
     output_log.saveOutputLog(epoch, opt)
     loss = running_loss / len(dataset_dl)
