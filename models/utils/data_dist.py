@@ -2,23 +2,44 @@ import matplotlib.pyplot as plt
 import mlflow
 import seaborn as sns
 
-def datasetHistogram(train_df, val_df, grade, name):
-    fig = plt.figure(figsize=(30,20))
-    i=0
-    for g in grade:
-        for n in name:
-            i += 1
-            plt.subplot(4,5,i)
-            g_val_df = val_df[val_df['Rank'] == g]
-            g_train_df = train_df[train_df['Rank'] == g]
-            plt.hist(g_val_df[n], bins=10, width=0.25, alpha=0.5)
-            plt.hist(g_train_df[n], bins=10, width=0.25, alpha=0.5)
-            plt.xlabel('Value')
-            plt.ylabel('Frequency')
-            plt.title(f'Histogram of {g} {n}')
-            plt.legend(labels=['valid', 'train'])
-    mlflow.log_figure(fig, "Dataset_Histogram.jpg")
-    plt.clf()
+# +
+def logDatasetHistogram(train_df, val_df, columns):
+    fig = plt.figure(figsize=(10,5))
+    for column in columns:
+        plt.subplot(1,2,1)
+        plt.hist(train_df[column], bins=10, width=0.25)
+        plt.xlabel('Value')
+        plt.ylabel('Frequency')
+        plt.title(f'Histogram of Train {column}')
+        
+        plt.subplot(1,2,2)
+        plt.hist(val_df[column], bins=10, width=0.25)
+        plt.xlabel('Value')
+        plt.ylabel('Frequency')
+        plt.title(f'Histogram of Valid {column}')
+        mlflow.log_figure(fig, f"dataset/Histogram_{column}.jpg")
+        plt.clf()
+        
+def logDatasetKDE(train_df, val_df, columns):
+    fig = plt.figure(figsize=(10,5))
+    for column in columns:
+        plt.subplot(1,2,1)
+        sns.kdeplot(train_df[column], bw='0.1')
+        plt.xlabel('Value')
+        plt.ylabel('Frequency')
+        plt.title(f'Histogram of Train {column}')
+        
+        plt.subplot(1,2,2)
+        sns.kdeplot(val_df[column], bw='0.1')
+        plt.xlabel('Value')
+        plt.ylabel('Frequency')
+        plt.title(f'Histogram of Valid {column}')
+        mlflow.log_figure(fig, f"dataset/KDE_{column}.jpg")
+        plt.clf()
+    
+
+
+# -
 
 def datasetKDE(train_df, val_df, grade, name):
     fig = plt.figure(figsize=(30,20))
