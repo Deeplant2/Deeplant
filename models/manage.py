@@ -21,6 +21,7 @@ import models.make_model as m
 import utils.dataset as dataset
 import utils.loss as loss
 import utils.log as log
+import utils.data_dist as data_dist
 
 import argparse
 import json
@@ -40,6 +41,7 @@ parser.add_argument('--epochs', default=10, type=int)  #epochs
 parser.add_argument('--log_epoch', default=10, type=int)  # save model per log epochs
 parser.add_argument('--lr', '--learning_rate', default=1e-5, type=float)  # learning rate
 parser.add_argument('--data_path', default='/home/work/deeplant_data', type=str)  # data path
+parser.add_argument('--sanity', default=False, type=bool) # test mode
 args=parser.parse_args()
 
 # -----------------------------------------------------------------------------------------------------------------
@@ -66,6 +68,7 @@ lr = args.lr
 experiment_name = args.ex
 run_name = args.run
 log_epoch = args.log_epoch
+sanity = args.sanity
 
 #Define data pathes
 datapath = args.data_path
@@ -100,6 +103,7 @@ with mlflow.start_run(run_name=run_name) as parent_run:
     mlflow.log_dict(model_cfgs, 'config/configs.json')
     mlflow.log_param("num_epochs", epochs)
     mlflow.log_param("learning_rate", lr)
+    mlflow.log_param("log_epoch", log_epoch)
 
     params_train = {
         'num_epochs':epochs,
@@ -112,31 +116,39 @@ with mlflow.start_run(run_name=run_name) as parent_run:
         'columns_name':columns_name,
         'eval_function':eval_function,
         'save_model':save_model,
-        'loss_func':None
+        'loss_func':None,
+        'sanity':sanity
     }
         
     if args.mode =='train':
         if cross_validation == 0:
             model = m.create_model(model_cfgs)
             model = model.to(device)
+            
+            algorithm = model.getAlgorithm()
+            
             total_params = sum(p.numel() for p in model.parameters())
             mlflow.log_param("total_parmas", total_params)
+            
+            data_dist.logDatasetHistogram(train_set, test_set, columns_name)
             
             params_train['optimizer'] = optim.Adam(model.parameters(), lr = lr)
             params_train['lr_scheduler'] = ReduceLROnPlateau(params_train['optimizer'], patience = 2, factor = factor, threshold = threshold)
             params_train['train_dl'] = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
             params_train['val_dl'] = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
             
-            algorithm = model.getAlgorithm()
             
             if algorithm == 'classification':
                 params_train['loss_func'] = nn.CrossEntropyLoss()
+                mlflow.log_param("loss_func", params_train['loss_func'])
                 model, _, _, _, _ = train.classification(model, params_train)
             elif algorithm == 'regression':
                 #params_train['loss_func'] = loss.DenseWeightMSELoss(alpha=1, y=np.array(label_set[columns_name]))
                 params_train['loss_func'] = nn.MSELoss()
+                mlflow.log_param("loss_func", params_train['loss_func'])
                 model, _, _, _, _ = train.regression(model, params_train)
-               
+                
+ 
             model.cpu()
             del model
             gc.collect()
@@ -146,7 +158,7 @@ with mlflow.start_run(run_name=run_name) as parent_run:
             for fold, (train_idx,val_idx) in enumerate(splits.split(np.arange(len(label_set)))):
                 model = m.create_model(model_cfgs)
                 model = model.to(device)
-
+                
                 params_train['optimizer'] = optim.Adam(model.parameters(), lr = lr)
                 params_train['lr_scheduler'] = ReduceLROnPlateau(params_train['optimizer'], patience = 2, factor = factor, threshold = threshold)
                 train_dataset = dataset.CreateImageDataset(label_set.iloc[train_idx], datapath, model_cfgs['datasets'], output_columns, train=True)
@@ -159,12 +171,15 @@ with mlflow.start_run(run_name=run_name) as parent_run:
                 algorithm = model.getAlgorithm()
                 with mlflow.start_run(run_name=str(fold+1), nested=True) as run:
                     print(f"Fold {fold+1}: {run.info.run_id}")
+                    data_dist.logDatasetHistogram(label_set.iloc[train_idx], label_set.iloc[val_idx], columns_name)
                     if algorithm == 'classification':
                         params_train['loss_func'] = nn.CrossEntropyLoss()
+                        mlflow.log_param("loss_func", params_train['loss_func'])
                         model, train_loss, val_loss, train_metric, val_metric = train.classification(model, params_train)
                     elif algorithm == 'regression':
-                        #params_train['loss_func'] = loss.DenseWeightMSELoss(alpha=1, y=np.array(label_set[columns_name]))
+                        #params_train['loss_func'] = loss.DenseWeightMSELoss(alpha=0.3, y=np.array(label_set[columns_name]))
                         params_train['loss_func'] = nn.MSELoss()
+                        mlflow.log_param("loss_func", params_train['loss_func'])
                         model, train_loss, val_loss, train_metric, val_metric = train.regression(model, params_train)
                         
                 train_loss_list.append(train_loss)
