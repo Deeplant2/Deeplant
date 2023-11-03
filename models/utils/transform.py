@@ -1,6 +1,12 @@
 # +
 from torchvision import transforms
+import torch
 
+def grayscale_to_color(img):
+    if img.size(0) == 1:
+        img = torch.cat([img,img,img], dim = 0)
+    img = img[0:3]
+    return img
 
 def create_transform(dataset_cfgs):
     
@@ -21,6 +27,8 @@ def create_transform(dataset_cfgs):
             train.append(transforms.Grayscale(num_output_channels=train_transform['Grayscale']))
         if train_transform['ToTensor'] is True:
             train.append(transforms.ToTensor())
+        if train_transform['GrayToColor'] is True:   
+            train.append(transforms.Lambda(grayscale_to_color))
             
         if train: 
             train_transforms.append(transforms.Compose(train))
@@ -41,6 +49,8 @@ def create_transform(dataset_cfgs):
             val.append(transforms.Grayscale(num_output_channels=val_transform['Grayscale']))
         if val_transform['ToTensor'] is True:
             val.append(transforms.ToTensor())
+        if train_transform['GrayToColor'] is True:   
+            val.append(transforms.Lambda(grayscale_to_color))
             
         if val:
             val_transforms.append(transforms.Compose(val))
