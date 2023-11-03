@@ -10,7 +10,7 @@ class TimmModel(nn.Module):
     def __init__(self):
         super(TimmModel,self).__init__()
         self.algorithm = "regression"
-        self.model = timm.create_model("vit_base_patch32_clip_448.laion2b_ft_in12k_in1k", pretrained=True, num_classes=5)
+        self.model = timm.create_model("vit_base_patch32_clip_448.laion2b_ft_in12k_in1k", pretrained=True, num_classes=1)
     def forward(self, inputs):
         input = inputs[0].to(device)
         output = self.model(input)

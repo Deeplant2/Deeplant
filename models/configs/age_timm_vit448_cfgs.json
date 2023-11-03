@@ -1,3 +1,4 @@
+
 {
     "hyperparameters":{
         "num_workers":3,
@@ -12,7 +13,7 @@
         "cross_validation":10
     },
     "models":{
-        "module":"models.graph_channel",
+        "module":"models.age_timm_vit448",
         "model_name":null,
         "islogged":null,
         "num_classes":null,
@@ -22,7 +23,7 @@
         {
             "image_size":448,
             "isImage":true,
-            "input_column": 13,
+            "input_column": 0,
             "graph":null,
             "train_transform":{
                 "Resize":[448,448],
@@ -31,7 +32,7 @@
                 "RandomRotation":[-180,180],
                 "Grayscale":null,
                 "ToTensor":true,
-                "GrayToColor":false
+                "GrayToColor":true
             },
             "val_transform":{
                 "Resize":[448,448],
@@ -40,34 +41,9 @@
                 "RandomRotation":null,
                 "Grayscale":null,
                 "ToTensor":true,
-                "GrayToColor":false
-            }
-        },
-        {
-            "image_size":448,
-            "isImage":false,
-            "input_column": null,
-            "graph":"surface",
-            "train_transform":{
-                "Resize":[448,448],
-                "RandomHorizontalFlip":null,
-                "RandomVerticalFlip":null,
-                "RandomRotation":null,
-                "Grayscale":1,
-                "ToTensor":true,
-                "GrayToColor":false
-            },
-            "val_transform":{
-                "Resize":[448,448],
-                "RandomHorizontalFlip":null,
-                "RandomVerticalFlip":null,
-                "RandomRotation":null,
-                "Grayscale":1,
-                "ToTensor":true,
-                "GrayToColor":false
+                "GrayToColor":true
             }
         }
-
     ],
-    "output_columns": [8,18,10,11,12]
+    "output_columns": [1]
 }
