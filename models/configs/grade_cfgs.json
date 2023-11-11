@@ -1,3 +1,4 @@
+
 {
     "hyperparameters":{
         "num_workers":3,
@@ -12,7 +13,7 @@
         "cross_validation":10
     },
     "models":{
-        "module":"models.graph_channel",
+        "module":"models.vit448_grade",
         "model_name":null,
         "islogged":null,
         "num_classes":null,
@@ -44,16 +45,16 @@
             }
         },
         {
-            "image_size":448,
+            "image_size":null,
             "isImage":false,
-            "input_column": null,
-            "graph":"gsurface",
+            "input_column": [14,15,16,17],
+            "graph":null,
             "train_transform":{
                 "Resize":[448,448],
                 "RandomHorizontalFlip":null,
                 "RandomVerticalFlip":null,
                 "RandomRotation":null,
-                "Grayscale":1,
+                "Grayscale":null,
                 "ToTensor":true,
                 "GrayToColor":false
             },
@@ -62,12 +63,11 @@
                 "RandomHorizontalFlip":null,
                 "RandomVerticalFlip":null,
                 "RandomRotation":null,
-                "Grayscale":1,
+                "Grayscale":null,
                 "ToTensor":true,
                 "GrayToColor":false
             }
         }
-
     ],
     "output_columns": [8,18,10,11,12]
 }

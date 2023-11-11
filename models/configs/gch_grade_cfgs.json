@@ -45,9 +45,9 @@
         },
         {
             "image_size":448,
-            "isImage":false,
-            "input_column": null,
-            "graph":"gsurface",
+            "isImage":true,
+            "input_column": 21,
+            "graph":null,
             "train_transform":{
                 "Resize":[448,448],
                 "RandomHorizontalFlip":null,

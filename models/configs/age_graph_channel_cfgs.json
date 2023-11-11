@@ -9,10 +9,10 @@
         "seed":42,
         "save_model":true,
         "eval_function":["MAE","ACC","R2S"],
-        "cross_validation":10
+        "cross_validation":5
     },
     "models":{
-        "module":"models.graph_channel",
+        "module":"models.graph_channel_vit224",
         "model_name":null,
         "islogged":null,
         "num_classes":null,
@@ -20,36 +20,36 @@
     },
     "datasets":[
         {
-            "image_size":448,
+            "image_size":224,
             "isImage":true,
-            "input_column": 13,
+            "input_column": 0,
             "graph":null,
             "train_transform":{
-                "Resize":[448,448],
+                "Resize":[224,224],
                 "RandomHorizontalFlip":0.5,
                 "RandomVerticalFlip":0.5,
                 "RandomRotation":[-180,180],
                 "Grayscale":null,
                 "ToTensor":true,
-                "GrayToColor":false
+                "GrayToColor":true
             },
             "val_transform":{
-                "Resize":[448,448],
+                "Resize":[224,224],
                 "RandomHorizontalFlip":null,
                 "RandomVerticalFlip":null,
                 "RandomRotation":null,
                 "Grayscale":null,
                 "ToTensor":true,
-                "GrayToColor":false
+                "GrayToColor":true
             }
         },
         {
-            "image_size":448,
-            "isImage":false,
-            "input_column": null,
-            "graph":"gsurface",
+            "image_size":224,
+            "isImage":true,
+            "input_column": 5,
+            "graph":null,
             "train_transform":{
-                "Resize":[448,448],
+                "Resize":[224,224],
                 "RandomHorizontalFlip":null,
                 "RandomVerticalFlip":null,
                 "RandomRotation":null,
@@ -58,7 +58,7 @@
                 "GrayToColor":false
             },
             "val_transform":{
-                "Resize":[448,448],
+                "Resize":[224,224],
                 "RandomHorizontalFlip":null,
                 "RandomVerticalFlip":null,
                 "RandomRotation":null,
@@ -69,5 +69,5 @@
         }
 
     ],
-    "output_columns": [8,18,10,11,12]
+    "output_columns": [1]
 }
