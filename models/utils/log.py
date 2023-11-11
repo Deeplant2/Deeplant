@@ -13,6 +13,10 @@ def convertEvalName(name):
         return "r2score"
     elif name == "ACC":
         return 'accuracy'
+    elif name == "FACC":
+        return 'floor accuracy'
+    elif name == 'RACC':
+        return 'round accuracy'
     elif name == "MAE":
         return "mae"
     

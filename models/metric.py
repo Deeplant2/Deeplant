@@ -4,27 +4,39 @@ import numpy as np
 import mlflow
 
 class Accuracy():
-    def __init__(self, length, num_classes, mode, columns_name):
-        
+    def __init__(self, length, num_classes, algorithm, columns_name, method = None):
         self.num_classes = num_classes
         self.length = length
-        self.mode = mode
+        self.algorithm = algorithm
         self.columns_name = columns_name
-
+        self.method = method
         self.cumulative_metric = np.zeros(num_classes)
 
     def update(self, output, yb):
-        if self.mode == 'classification':
+        if self.algorithm == 'classification':
             _, pred_b = torch.max(output.data,1)
             metric_b = (pred_b == yb).sum().item()
             self.cumulative_metric += metric_b
 
-        elif self.mode == 'regression':
-            if self.num_classes != 1:
-                for i in range(self.num_classes):
-                    self.cumulative_metric[i] += (torch.round(output[:,i]) == yb[:,i]).sum().item()
-            else:
-                self.cumulative_metric += (torch.round(output) == yb).sum().item()
+        elif self.algorithm == 'regression':
+            if self.method == None:
+                if self.num_classes != 1:
+                    for i in range(self.num_classes):
+                        self.cumulative_metric[i] += (torch.round(output[:,i]) == yb[:,i]).sum().item()
+                else:
+                    self.cumulative_metric += (torch.round(output) == yb).sum().item()
+            elif self.method == "floor":
+                if self.num_classes != 1:
+                    for i in range(self.num_classes):
+                        self.cumulative_metric[i] += (torch.floor(output[:,i]/10)*10 == torch.floor(yb[:,i]/10)*10).sum().item()
+                else:
+                    self.cumulative_metric += (torch.floor(output/10)*10 == torch.floor(yb/10)*10).sum().item()
+            elif self.method == "round":
+                if self.num_classes != 1:
+                    for i in range(self.num_classes):
+                        self.cumulative_metric[i] += (torch.round(output[:,i]/10)*10 == torch.round(yb[:,i]/10)*10).sum().item()
+                else:
+                    self.cumulative_metric += (torch.round(output/10)*10 == torch.round(yb/10)*10).sum().item()
         
     def getResult(self):
         return self.cumulative_metric / self.length
@@ -42,7 +54,8 @@ class Accuracy():
     def logMetric(self, mode, epoch):  
         result = self.getResult()
         for i in range(self.num_classes):
-            mlflow.log_metric(f"{mode} accuracy {self.columns_name[i]}", result[i], epoch)
+            mlflow.log_metric(f"{mode} {self.method} accuracy {self.columns_name[i]}", result[i], epoch)
+
 
 
 class R2score():
@@ -81,7 +94,6 @@ class R2score():
         mlflow.log_metric(f"{mode} r2score", self.getResult(), epoch)
 
 
-
 class MeanAbsError():
     def __init__(self, length, num_classes, columns_name):
         self.num_classes = num_classes
@@ -116,15 +128,19 @@ class MeanAbsError():
 
 
 class Metrics():
-    def __init__(self,eval_function, num_classes, mode, data_length, columns_name):
+    def __init__(self,eval_function, num_classes, algorithm, data_length, columns_name):
         self.metrics = []
         for f in eval_function:
             if f == 'ACC':
-                self.metrics.append(Accuracy(data_length, num_classes, mode, columns_name))
+                self.metrics.append(Accuracy(data_length, num_classes, algorithm, columns_name))
             elif f == 'R2S':
                 self.metrics.append(R2score(data_length))
             elif f == 'MAE':
                 self.metrics.append(MeanAbsError(data_length, num_classes, columns_name))
+            elif f == 'FACC':
+                self.metrics.append(Accuracy(data_length, num_classes, algorithm, columns_name, 'floor'))
+            elif f == 'RACC':
+                self.metrics.append(Accuracy(data_length, num_classes, algorithm, columns_name, 'round'))
 
     def update(self, output, yb):
         for metric in self.metrics:
