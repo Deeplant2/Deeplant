@@ -5,6 +5,7 @@ from torch.utils.data import Dataset
 import utils.image_dist as imdi
 import utils.transform as transform
 
+# +
 class CreateImageDataset(Dataset):
     def __init__(self, labels, img_dir, dataset_cfgs, output_columns, train=True):
 
@@ -12,7 +13,6 @@ class CreateImageDataset(Dataset):
         self.image_sizes = []
         self.isImage = []
         self.input_columns = []
-        self.graph = []
         self.output_columns = output_columns
         self.model_cnt = len(dataset_cfgs)
 
@@ -20,10 +20,8 @@ class CreateImageDataset(Dataset):
             image_size = dataset_cfg['image_size']
             isImage = dataset_cfg['isImage']
             input_column = dataset_cfg['input_column']
-            graph = dataset_cfg['graph']
             self.image_sizes.append(image_size)
             self.isImage.append(isImage)
-            self.graph.append(graph)
             self.input_columns.append(input_column)
 
         self.img_dir = img_dir
@@ -48,16 +46,6 @@ class CreateImageDataset(Dataset):
                 else:
                     image = self.val_transforms[i](image)
                 inputs.append(image)
-                
-            elif self.graph[i] is not None:
-                grade = self.img_labels.iloc[idx]['Rank']
-                graph = self.openGraph(self.graph[i], grade, idx, i)
-                if self.train:
-                    graph = self.train_transforms[i](graph)
-                else:
-                    graph = self.val_transforms[i](graph)
-                inputs.append(graph[0:3])
-
             else:
                 input = torch.tensor(self.img_labels.iloc[idx, self.input_columns[i]], dtype=torch.float32)
                 inputs.append(input) 
@@ -66,38 +54,38 @@ class CreateImageDataset(Dataset):
     
     
     
-    def openGraph(self, graph, grade, idx, i):
-        if graph == 'gcolor':
-            temp = Image.open(f'utils/kde/kde_Color_{grade}.png')
-        elif graph == 'gsurface':
-            temp = Image.open(f'utils/kde/kde_Surface Moisture_{grade}.png')
-        elif graph == 'gtexture':
-            temp = Image.open(f'utils/kde/kde_Texture_{grade}.png')
-        elif graph == 'gmarbling':
-            temp = Image.open(f'utils/kde/kde_Marbling_{grade}.png')
-        elif graph == 'gtotal':
-            temp = Image.open(f'utils/kde/kde_Total_{grade}.png')
-        elif graph == 'color':
-            temp = Image.open(f'utils/kde/kde_Color.png')
-        elif graph == 'surface':
-            temp = Image.open(f'utils/kde/kde_Surface Moisture.png')
-        elif graph == 'texture':
-            temp = Image.open(f'utils/kde/kde_Texture.png')
-        elif graph == 'marbling':
-            temp = Image.open(f'utils/kde/kde_Marbling.png')
-        elif graph == 'total':
-            temp = Image.open(f'utils/kde/kde_Total.png')
-        elif graph == 'pcolor':
-            name = self.img_labels.iloc[idx, self.input_columns[i]]
-            img_path = os.path.join(self.img_dir, name)
-            temp = imdi.drawColorGraph(img_path)
-        elif graph == 'pgray':
-            name = self.img_labels.iloc[idx, self.input_columns[i]]
-            img_path = os.path.join(self.img_dir, name)
-            temp = imdi.drawGrayGraph(img_path)
-        else:
-            print('invalid graph name')
-        return temp
+#     def openGraph(self, graph, grade, idx, i):
+#         if graph == 'gcolor':
+#             temp = Image.open(f'utils/kde/kde_Color_{grade}.png')
+#         elif graph == 'gsurface':
+#             temp = Image.open(f'utils/kde/kde_Surface Moisture_{grade}.png')
+#         elif graph == 'gtexture':
+#             temp = Image.open(f'utils/kde/kde_Texture_{grade}.png')
+#         elif graph == 'gmarbling':
+#             temp = Image.open(f'utils/kde/kde_Marbling_{grade}.png')
+#         elif graph == 'gtotal':
+#             temp = Image.open(f'utils/kde/kde_Total_{grade}.png')
+#         elif graph == 'color':
+#             temp = Image.open(f'utils/kde/kde_Color.png')
+#         elif graph == 'surface':
+#             temp = Image.open(f'utils/kde/kde_Surface Moisture.png')
+#         elif graph == 'texture':
+#             temp = Image.open(f'utils/kde/kde_Texture.png')
+#         elif graph == 'marbling':
+#             temp = Image.open(f'utils/kde/kde_Marbling.png')
+#         elif graph == 'total':
+#             temp = Image.open(f'utils/kde/kde_Total.png')
+#         elif graph == 'pcolor':
+#             name = self.img_labels.iloc[idx, self.input_columns[i]]
+#             img_path = os.path.join(self.img_dir, name)
+#             temp = imdi.drawColorGraph(img_path)
+#         elif graph == 'pgray':
+#             name = self.img_labels.iloc[idx, self.input_columns[i]]
+#             img_path = os.path.join(self.img_dir, name)
+#             temp = imdi.drawGrayGraph(img_path)
+#         else:
+#             print('invalid graph name')
+#         return temp
 
     
     # def add_graph(self, image, transform, grade, img_path):
