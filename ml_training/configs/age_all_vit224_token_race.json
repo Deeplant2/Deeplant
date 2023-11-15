@@ -1,3 +1,4 @@
+
 {
     "hyperparameters":{
         "num_workers":3,
@@ -6,70 +7,66 @@
         "threshold":0.03,
         "momentum":0.9,
         "weight_decay":5e-4,
-        "seed":42,
+        "seed":22108,
         "save_model":true,
-        "eval_function":["MAE","ACC","R2S"],
-        "cross_validation":10,
-        "random_seed":42
+        "eval_function":["MAE","FACC","RACC","R2S"],
+        "cross_validation":5
     },
     "models":{
-        "module":"models.graph_channel_vit",
-        "model_name":"vit_base_patch32_clip_448.laion2b_ft_in12k_in1k",
+        "module":"models.vit_token_embedding",
+        "model_name":"vit_base_patch16_224.augreg_in21k_ft_in1k",
         "islogged":false,
-        "num_classes":5,
+        "num_classes":1,
         "pretrained":true,
         "in_chans":4
     },
     "datasets":[
         {
-            "image_size":448,
+            "image_size":224,
             "isImage":true,
-            "input_column": 13,
-            "graph":null,
+            "input_column": 0,
             "train_transform":{
-                "Resize":[448,448],
+                "Resize":[224,224],
                 "RandomHorizontalFlip":0.5,
                 "RandomVerticalFlip":0.5,
                 "RandomRotation":[-180,180],
                 "Grayscale":null,
                 "ToTensor":true,
-                "GrayToColor":false
+                "GrayToColor":true
             },
             "val_transform":{
-                "Resize":[448,448],
+                "Resize":[224,224],
                 "RandomHorizontalFlip":null,
                 "RandomVerticalFlip":null,
                 "RandomRotation":null,
                 "Grayscale":null,
                 "ToTensor":true,
-                "GrayToColor":false
+                "GrayToColor":true
             }
         },
         {
-            "image_size":448,
+            "image_size":null,
             "isImage":false,
-            "input_column": null,
-            "graph":"gsurface",
+            "input_column": 3,
             "train_transform":{
-                "Resize":[448,448],
-                "RandomHorizontalFlip":null,
-                "RandomVerticalFlip":null,
-                "RandomRotation":null,
-                "Grayscale":1,
+                "Resize":[224,224],
+                "RandomHorizontalFlip":0.5,
+                "RandomVerticalFlip":0.5,
+                "RandomRotation":[-180,180],
+                "Grayscale":null,
                 "ToTensor":true,
-                "GrayToColor":false
+                "GrayToColor":true
             },
             "val_transform":{
-                "Resize":[448,448],
+                "Resize":[224,224],
                 "RandomHorizontalFlip":null,
                 "RandomVerticalFlip":null,
                 "RandomRotation":null,
-                "Grayscale":1,
+                "Grayscale":null,
                 "ToTensor":true,
-                "GrayToColor":false
+                "GrayToColor":true
             }
         }
-
     ],
-    "output_columns": [8,18,10,11,12]
+    "output_columns": [1]
 }

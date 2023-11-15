@@ -1,3 +1,4 @@
+
 {
     "hyperparameters":{
         "num_workers":3,
@@ -6,24 +7,24 @@
         "threshold":0.03,
         "momentum":0.9,
         "weight_decay":5e-4,
-        "seed":42,
+        "seed":22108,
         "save_model":true,
         "eval_function":["MAE","FACC","RACC","R2S"],
         "cross_validation":5
     },
     "models":{
-        "module":"models.graph_channel_vit224",
-        "model_name":null,
-        "islogged":null,
-        "num_classes":null,
-        "pretrained":null
+        "module":"models.vit_token_embedding",
+        "model_name":"vit_base_patch16_224.augreg_in21k_ft_in1k",
+        "islogged":false,
+        "num_classes":1,
+        "pretrained":true,
+        "in_chans":4
     },
     "datasets":[
         {
             "image_size":224,
             "isImage":true,
             "input_column": 0,
-            "graph":null,
             "train_transform":{
                 "Resize":[224,224],
                 "RandomHorizontalFlip":0.5,
@@ -44,30 +45,28 @@
             }
         },
         {
-            "image_size":224,
-            "isImage":true,
-            "input_column": 8,
-            "graph":null,
+            "image_size":null,
+            "isImage":false,
+            "input_column": 2,
             "train_transform":{
                 "Resize":[224,224],
-                "RandomHorizontalFlip":null,
-                "RandomVerticalFlip":null,
-                "RandomRotation":null,
-                "Grayscale":1,
+                "RandomHorizontalFlip":0.5,
+                "RandomVerticalFlip":0.5,
+                "RandomRotation":[-180,180],
+                "Grayscale":null,
                 "ToTensor":true,
-                "GrayToColor":false
+                "GrayToColor":true
             },
             "val_transform":{
                 "Resize":[224,224],
                 "RandomHorizontalFlip":null,
                 "RandomVerticalFlip":null,
                 "RandomRotation":null,
-                "Grayscale":1,
+                "Grayscale":null,
                 "ToTensor":true,
-                "GrayToColor":false
+                "GrayToColor":true
             }
         }
-
     ],
     "output_columns": [1]
 }

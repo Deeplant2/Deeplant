@@ -7,26 +7,26 @@
         "threshold":0.03,
         "momentum":0.9,
         "weight_decay":5e-4,
-        "seed":42,
+        "seed":22108,
         "save_model":true,
-        "eval_function":["MAE","ACC","R2S"],
-        "cross_validation":10
+        "eval_function":["MAE","FACC","RACC","R2S"],
+        "cross_validation":5
     },
     "models":{
-        "module":"models.age_timm_vit448",
-        "model_name":null,
-        "islogged":null,
-        "num_classes":null,
-        "pretrained":null
+        "module":"models.timm_regression",
+        "model_name":"vit_base_patch16_224.augreg_in21k_ft_in1k",
+        "islogged":false,
+        "num_classes":1,
+        "pretrained":true,
+        "in_chans":3
     },
     "datasets":[
         {
-            "image_size":448,
+            "image_size":224,
             "isImage":true,
             "input_column": 0,
-            "graph":null,
             "train_transform":{
-                "Resize":[448,448],
+                "Resize":[224,224],
                 "RandomHorizontalFlip":0.5,
                 "RandomVerticalFlip":0.5,
                 "RandomRotation":[-180,180],
@@ -35,7 +35,7 @@
                 "GrayToColor":true
             },
             "val_transform":{
-                "Resize":[448,448],
+                "Resize":[224,224],
                 "RandomHorizontalFlip":null,
                 "RandomVerticalFlip":null,
                 "RandomRotation":null,
