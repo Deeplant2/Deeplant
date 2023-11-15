@@ -8,7 +8,6 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 class LastModule(nn.Module):
     def __init__(self, in_chans, out_chans):
         super().__init__() 
-        output_shape = 5
         self.fc1 = nn.Linear(in_chans, in_chans*2, bias=True)
         self.fc2 = nn.Linear(in_chans*2, out_chans, bias=True)
 
@@ -20,7 +19,7 @@ class LastModule(nn.Module):
 
 class ECModel(nn.Module):
     def __init__(self, model_name, num_classes, in_chans):
-        super(GCModel,self).__init__()
+        super(ECModel,self).__init__()
         self.algorithm = "regression"
         self.fc_in_chans = 0
         
