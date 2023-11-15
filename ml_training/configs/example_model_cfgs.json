@@ -9,8 +9,8 @@
         "weight_decay":5e-4,
         "seed":42,
         "save_model":true,
-        "eval_function":["MAE","ACC","R2S"],
-        "cross_validation":0
+        "eval_function":["MAE","ACC","FACC","RACC","R2S"],
+        "cross_validation":5,
     },
     "models":{
         "module":"models.vit_cnn",

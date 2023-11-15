@@ -8,11 +8,11 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # +
 class TokenModel(nn.Module):
-    def __init__(self):
+    def __init__(self, model_name, num_classes):
         super(TokenModel,self).__init__()
         self.algorithm = "regression"
         
-        model = timm.create_model("vit_base_patch16_224.augreg_in21k_ft_in1k", pretrained=True, num_classes=1)
+        model = timm.create_model(model_name, pretrained=True, num_classes=num_classes)
         module_list = list(model.children())
         
         self.cls_token = model.cls_token
@@ -53,6 +53,6 @@ class TokenModel(nn.Module):
 
 # -
 
-def create_model():
-    model = TokenModel()
+def create_model(model_name, num_classes, in_chans, pretrained):
+    model = TokenModel(model_name, num_classes)
     return model

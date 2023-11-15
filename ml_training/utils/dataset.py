@@ -49,16 +49,9 @@ class CreateImageDataset(Dataset):
                     image = self.val_transforms[i](image)
                 inputs.append(image)
                 
-            elif self.graph is not None:
-#                 graph_transform = transforms.Compose([
-#                     transforms.Resize([self.image_sizes[i],self.image_sizes[i]]),
-#                     transforms.Grayscale(num_output_channels=1),
-#                     transforms.ToTensor(),
-#                 ])
-                
+            elif self.graph[i] is not None:
                 grade = self.img_labels.iloc[idx]['Rank']
                 graph = self.openGraph(self.graph[i], grade, idx, i)
-#                 graph = graph_transform(graph)
                 if self.train:
                     graph = self.train_transforms[i](graph)
                 else:

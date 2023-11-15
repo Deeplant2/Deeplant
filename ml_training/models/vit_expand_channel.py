@@ -6,11 +6,11 @@ from torchvision.models.feature_extraction import create_feature_extractor
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 class LastModule(nn.Module):
-    def __init__(self, input_shape):
+    def __init__(self, in_chans, out_chans):
         super().__init__() 
-        output_shape = 1
-        self.fc1 = nn.Linear(input_shape, input_shape*2, bias=True)
-        self.fc2 = nn.Linear(input_shape*2, output_shape, bias=True)
+        output_shape = 5
+        self.fc1 = nn.Linear(in_chans, in_chans*2, bias=True)
+        self.fc2 = nn.Linear(in_chans*2, out_chans, bias=True)
 
     def forward(self, x):
         x = F.gelu(self.fc1(x))
@@ -18,16 +18,17 @@ class LastModule(nn.Module):
         return x
 
 
-class GCModel(nn.Module):
-    def __init__(self):
+class ECModel(nn.Module):
+    def __init__(self, model_name, num_classes, in_chans):
         super(GCModel,self).__init__()
         self.algorithm = "regression"
-        self.fc_input_shape = 0
-        model_1 = timm.create_model("vit_base_patch16_224.augreg_in21k_ft_in1k", pretrained=True, num_classes=1, in_chans=4)
+        self.fc_in_chans = 0
+        
+        model_1 = timm.create_model(model_name, pretrained=True, num_classes=num_classes, in_chans=in_chans)
         self.model_1 = create_feature_extractor(model_1, return_nodes={"fc_norm":"out"})
         
-        self.fc_input_shape += self.model_1.state_dict()[list(self.model_1.state_dict())[-1]].shape[-1]
-        self.fc_layer = LastModule(self.fc_input_shape)
+        self.fc_in_chans += self.model_1.state_dict()[list(self.model_1.state_dict())[-1]].shape[-1]
+        self.fc_layer = LastModule(self.fc_in_chans, num_classes)
     
     
     def forward(self, inputs):
@@ -47,6 +48,6 @@ class GCModel(nn.Module):
         return self.algorithm
 
 
-def create_model():
-    model = GCModel()
+def create_model(model_name, num_classes, in_chans, pretrained):
+    model = ECModel(model_name, num_classes, in_chans)
     return model

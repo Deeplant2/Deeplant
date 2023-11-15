@@ -9,11 +9,11 @@
         "weight_decay":5e-4,
         "seed":42,
         "save_model":true,
-        "eval_function":["MAE","ACC","R2S"],
+        "eval_function":["MAE","FACC","RACC","R2S"],
         "cross_validation":5
     },
     "models":{
-        "module":"models.timm_vit224",
+        "module":"models.vit224_token_embedding",
         "model_name":null,
         "islogged":null,
         "num_classes":null,
@@ -24,6 +24,30 @@
             "image_size":224,
             "isImage":true,
             "input_column": 0,
+            "graph":null,
+            "train_transform":{
+                "Resize":[224,224],
+                "RandomHorizontalFlip":0.5,
+                "RandomVerticalFlip":0.5,
+                "RandomRotation":[-180,180],
+                "Grayscale":null,
+                "ToTensor":true,
+                "GrayToColor":true
+            },
+            "val_transform":{
+                "Resize":[224,224],
+                "RandomHorizontalFlip":null,
+                "RandomVerticalFlip":null,
+                "RandomRotation":null,
+                "Grayscale":null,
+                "ToTensor":true,
+                "GrayToColor":true
+            }
+        },
+        {
+            "image_size":null,
+            "isImage":false,
+            "input_column": 2,
             "graph":null,
             "train_transform":{
                 "Resize":[224,224],

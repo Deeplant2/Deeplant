@@ -1,4 +1,3 @@
-
 {
     "hyperparameters":{
         "num_workers":3,
@@ -9,11 +8,11 @@
         "weight_decay":5e-4,
         "seed":42,
         "save_model":true,
-        "eval_function":["MAE","AACC","R2S"],
+        "eval_function":["MAE","FACC","RACC","R2S"],
         "cross_validation":5
     },
     "models":{
-        "module":"models.vit224_token_embedding",
+        "module":"models.graph_channel_vit224",
         "model_name":null,
         "islogged":null,
         "num_classes":null,
@@ -45,29 +44,30 @@
             }
         },
         {
-            "image_size":null,
-            "isImage":false,
-            "input_column": 3,
+            "image_size":224,
+            "isImage":true,
+            "input_column": 8,
             "graph":null,
             "train_transform":{
                 "Resize":[224,224],
-                "RandomHorizontalFlip":0.5,
-                "RandomVerticalFlip":0.5,
-                "RandomRotation":[-180,180],
-                "Grayscale":null,
+                "RandomHorizontalFlip":null,
+                "RandomVerticalFlip":null,
+                "RandomRotation":null,
+                "Grayscale":1,
                 "ToTensor":true,
-                "GrayToColor":true
+                "GrayToColor":false
             },
             "val_transform":{
                 "Resize":[224,224],
                 "RandomHorizontalFlip":null,
                 "RandomVerticalFlip":null,
                 "RandomRotation":null,
-                "Grayscale":null,
+                "Grayscale":1,
                 "ToTensor":true,
-                "GrayToColor":true
+                "GrayToColor":false
             }
         }
+
     ],
     "output_columns": [1]
 }

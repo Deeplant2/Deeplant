@@ -42,6 +42,7 @@ parser.add_argument('--log_epoch', default=10, type=int)  # save model per log e
 parser.add_argument('--lr', '--learning_rate', default=1e-5, type=float)  # learning rate
 parser.add_argument('--data_path', default='/home/work/deeplant_data', type=str)  # data path
 parser.add_argument('--sanity', default=False, type=bool) # test mode
+parser.add_argument('--csv_name' default='new_train.csv')
 args=parser.parse_args()
 
 # -----------------------------------------------------------------------------------------------------------------
@@ -69,10 +70,11 @@ experiment_name = args.ex
 run_name = args.run
 log_epoch = args.log_epoch
 sanity = args.sanity
+csv_name = args.csv_name
 
 #Define data pathes
 datapath = args.data_path
-label_set = pd.read_csv(os.path.join(datapath,'new_train.csv'))
+label_set = pd.read_csv(os.path.join(datapath,csv_name))
 
 output_columns = model_cfgs['output_columns']
 columns_name = label_set.columns[output_columns].values
@@ -81,7 +83,7 @@ print(columns_name)
 # Define Data loader
 
 if cross_validation == 0:
-    train_set, test_set = train_test_split(label_set, test_size=0.1, random_state=seed)
+    train_set, test_set = train_test_split(label_set, test_size=0.1, random_state= seed)
     train_set.reset_index(inplace=True, drop=True)
     test_set.reset_index(inplace=True, drop=True)
     print(train_set)
@@ -90,7 +92,7 @@ if cross_validation == 0:
     train_dataset = dataset.CreateImageDataset(train_set, datapath, model_cfgs['datasets'], output_columns)
     test_dataset = dataset.CreateImageDataset(test_set, datapath, model_cfgs['datasets'], output_columns)
 else:
-    splits = KFold(n_splits = cross_validation, shuffle = True, random_state = 42)
+    splits = KFold(n_splits = cross_validation, shuffle = True, random_state = seed)
 
 # ------------------------------------------------------
 

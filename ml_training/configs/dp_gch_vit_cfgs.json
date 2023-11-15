@@ -7,16 +7,18 @@
         "momentum":0.9,
         "weight_decay":5e-4,
         "seed":42,
-        "save_model":false,
+        "save_model":true,
         "eval_function":["MAE","ACC","R2S"],
-        "cross_validation":0
+        "cross_validation":10,
+        "random_seed":42
     },
     "models":{
-        "module":"models.featuremap",
-        "model_name":null,
-        "islogged":null,
-        "num_classes":null,
-        "pretrained":null
+        "module":"models.graph_channel_vit",
+        "model_name":"vit_base_patch32_clip_448.laion2b_ft_in12k_in1k",
+        "islogged":false,
+        "num_classes":5,
+        "pretrained":true,
+        "in_chans":4
     },
     "datasets":[
         {
@@ -30,7 +32,8 @@
                 "RandomVerticalFlip":0.5,
                 "RandomRotation":[-180,180],
                 "Grayscale":null,
-                "ToTensor":true
+                "ToTensor":true,
+                "GrayToColor":false
             },
             "val_transform":{
                 "Resize":[448,448],
@@ -38,7 +41,8 @@
                 "RandomVerticalFlip":null,
                 "RandomRotation":null,
                 "Grayscale":null,
-                "ToTensor":true
+                "ToTensor":true,
+                "GrayToColor":false
             }
         },
         {
@@ -52,7 +56,8 @@
                 "RandomVerticalFlip":null,
                 "RandomRotation":null,
                 "Grayscale":1,
-                "ToTensor":true
+                "ToTensor":true,
+                "GrayToColor":false
             },
             "val_transform":{
                 "Resize":[448,448],
@@ -60,7 +65,8 @@
                 "RandomVerticalFlip":null,
                 "RandomRotation":null,
                 "Grayscale":1,
-                "ToTensor":true
+                "ToTensor":true,
+                "GrayToColor":false
             }
         }
 
