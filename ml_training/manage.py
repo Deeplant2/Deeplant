@@ -114,7 +114,7 @@ with mlflow.start_run(run_name=run_name) as parent_run:
         'val_dl':None,
         'lr_scheduler':None,
         'log_epoch':log_epoch,
-        'num_classes':len(model_cfgs['output_columns']),
+        'num_classes':model_cfgs['models']['num_classes'],
         'columns_name':columns_name,
         'eval_function':eval_function,
         'save_model':save_model,
@@ -141,6 +141,7 @@ with mlflow.start_run(run_name=run_name) as parent_run:
             
             
             if algorithm == 'classification':
+                params_train['columns_name'] = label_set[output_columns].unique()
                 params_train['loss_func'] = nn.CrossEntropyLoss()
                 mlflow.log_param("loss_func", params_train['loss_func'])
                 model, _, _, _, _ = train.classification(model, params_train)
@@ -175,6 +176,7 @@ with mlflow.start_run(run_name=run_name) as parent_run:
                     print(f"Fold {fold+1}: {run.info.run_id}")
                     data_dist.logDatasetHistogram(label_set.iloc[train_idx], label_set.iloc[val_idx], columns_name)
                     if algorithm == 'classification':
+                        params_train['columns_name'] = label_set[columns_name[0]].unique()
                         params_train['loss_func'] = nn.CrossEntropyLoss()
                         mlflow.log_param("loss_func", params_train['loss_func'])
                         model, train_loss, val_loss, train_metric, val_metric = train.classification(model, params_train)

@@ -4,7 +4,6 @@ import mlflow
 import numpy as np
 import metric as f
 import utils.analyze as analyze
-import utils.analyze_regression as analyze_r
 
 from tqdm import tqdm
 from torch import nn
@@ -64,7 +63,6 @@ def classification_epoch(model, loss_func, dataset_dl, epoch, eval_function, num
     metrics = f.Metrics(eval_function, num_classes, 'regression', len_data, columns_name)
 
     for xb, yb, name_b in tqdm(dataset_dl):
-        xb = transforming(xb)
         yb = yb.to(device).long()
         yb = yb[:,0]
         output = model(xb)
@@ -89,16 +87,16 @@ def classification_epoch(model, loss_func, dataset_dl, epoch, eval_function, num
     
         # Validation
         if opt is None:
-            confusion_matrix.updateConfusionMatrix(output, yb)
-            incorrect_output.updateIncorrectOutput(output, yb, name_b)
+            confusion_matrix.update(output, yb)
+            incorrect_output.update(output, yb, name_b)
 
         if sanity is True:
             break
 
     # Validation
     if opt is None: 
-        confusion_matrix.saveConfusionMatrix(epoch=epoch)
-        incorrect_output.saveIncorrectOutput(filename="incorrect_output.csv", epoch=epoch)
+        confusion_matrix.logMetric(epoch=epoch)
+        incorrect_output.logMetric(filename="incorrect_output.csv", epoch=epoch)
 
     loss = running_loss / len(dataset_dl)
     return loss, metrics
@@ -153,7 +151,7 @@ def regression_epoch(model, loss_func, dataset_dl, epoch, num_classes, columns_n
     running_loss = 0.0
     len_data = len(dataset_dl.sampler)
     metrics = f.Metrics(eval_function, num_classes, 'regression', len_data, columns_name)
-    output_log = analyze_r.OutputLog(columns_name, num_classes)
+    output_log = analyze.OutputLog(columns_name, num_classes)
 
     for xb, yb, name_b in tqdm(dataset_dl):
         yb = yb.to(device)
@@ -162,7 +160,7 @@ def regression_epoch(model, loss_func, dataset_dl, epoch, num_classes, columns_n
         loss = loss_func(output, yb)
         running_loss += loss.item()
         
-        output_log.updateOutputLog(output, yb, name_b)
+        output_log.update(output, yb, name_b)
         metrics.update(output, yb)
 
         if opt is not None:
@@ -173,7 +171,7 @@ def regression_epoch(model, loss_func, dataset_dl, epoch, num_classes, columns_n
         if sanity is True:
             break
         
-    output_log.saveOutputLog(epoch, opt)
+    output_log.logMetric(epoch, opt)
     loss = running_loss / len(dataset_dl)
     return loss, metrics
 

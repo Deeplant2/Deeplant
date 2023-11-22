@@ -54,7 +54,10 @@ class Accuracy():
     def logMetric(self, mode, epoch):  
         result = self.getResult()
         for i in range(self.num_classes):
-            mlflow.log_metric(f"{mode} {self.method} accuracy {self.columns_name[i]}", result[i], epoch)
+            if self.method is None:
+                mlflow.log_metric(f"{mode} accuracy {self.columns_name[i]}", result[i], epoch)
+            else:
+                mlflow.log_metric(f"{mode} {self.method} accuracy {self.columns_name[i]}", result[i], epoch)
 
 
 
