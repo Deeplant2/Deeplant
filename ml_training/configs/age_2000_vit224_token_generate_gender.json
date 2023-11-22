@@ -1,0 +1,49 @@
+
+{
+    "hyperparameters":{
+        "num_workers":3,
+        "batch_size":16,
+        "factor":0.5,
+        "threshold":0.03,
+        "momentum":0.9,
+        "weight_decay":5e-4,
+        "seed":9638,
+        "save_model":true,
+        "eval_function":["MAE","FACC","RACC","R2S"],
+        "cross_validation":5
+    },
+    "models":{
+        "module":"models.timm_regression",
+        "model_name":"vit_base_patch16_224.augreg_in21k_ft_in1k",
+        "islogged":false,
+        "num_classes":1,
+        "pretrained":true,
+        "in_chans":3
+    },
+    "datasets":[
+        {
+            "image_size":224,
+            "isImage":true,
+            "input_column": 0,
+            "train_transform":{
+                "Resize":[224,224],
+                "RandomHorizontalFlip":0.5,
+                "RandomVerticalFlip":0.5,
+                "RandomRotation":[-180,180],
+                "Grayscale":null,
+                "ToTensor":true,
+                "GrayToColor":true
+            },
+            "val_transform":{
+                "Resize":[224,224],
+                "RandomHorizontalFlip":null,
+                "RandomVerticalFlip":null,
+                "RandomRotation":null,
+                "Grayscale":null,
+                "ToTensor":true,
+                "GrayToColor":true
+            }
+        }
+    ],
+    "output_columns": [1]
+}
