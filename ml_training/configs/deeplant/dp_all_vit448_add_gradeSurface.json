@@ -1,0 +1,74 @@
+
+{
+    "hyperparameters":{
+        "num_workers":3,
+        "batch_size":16,
+        "factor":0.5,
+        "threshold":0.03,
+        "momentum":0.9,
+        "weight_decay":5e-4,
+        "seed":42,
+        "save_model":true,
+        "eval_function":["MAE","ACC","R2S"],
+        "cross_validation":5
+    },
+    "models":{
+        "module":"models.vit_add_images",
+        "model_name":"vit_base_patch32_clip_448.laion2b_ft_in12k_in1k",
+        "islogged":false,
+        "num_classes":5,
+        "pretrained":true,
+        "in_chans":3
+    },
+    "datasets":[
+        {
+            "image_size":448,
+            "isImage":true,
+            "input_column": 13,
+            "graph":null,
+            "train_transform":{
+                "Resize":[448,448],
+                "RandomHorizontalFlip":0.5,
+                "RandomVerticalFlip":0.5,
+                "RandomRotation":[-180,180],
+                "Grayscale":null,
+                "ToTensor":true,
+                "GrayToColor":true
+            },
+            "val_transform":{
+                "Resize":[448,448],
+                "RandomHorizontalFlip":null,
+                "RandomVerticalFlip":null,
+                "RandomRotation":null,
+                "Grayscale":null,
+                "ToTensor":true,
+                "GrayToColor":true
+            }
+        },
+        {
+            "image_size":448,
+            "isImage":true,
+            "input_column": 22,
+            "graph":null,
+            "train_transform":{
+                "Resize":[448,448],
+                "RandomHorizontalFlip":null,
+                "RandomVerticalFlip":null,
+                "RandomRotation":null,
+                "Grayscale":null,
+                "ToTensor":true,
+                "GrayToColor":false
+            },
+            "val_transform":{
+                "Resize":[448,448],
+                "RandomHorizontalFlip":null,
+                "RandomVerticalFlip":null,
+                "RandomRotation":null,
+                "Grayscale":null,
+                "ToTensor":true,
+                "GrayToColor":false
+            }
+        }
+    ],
+    "output_columns": [8,18,10,11,12]
+}
