@@ -18,7 +18,7 @@
         "islogged":false,
         "num_classes":5,
         "pretrained":true,
-        "in_chans":4
+        "in_chans":6
     },
     "datasets":[
         {
@@ -48,14 +48,14 @@
         {
             "image_size":448,
             "isImage":true,
-            "input_column": 25,
+            "input_column": 26,
             "graph":null,
             "train_transform":{
                 "Resize":[448,448],
                 "RandomHorizontalFlip":null,
                 "RandomVerticalFlip":null,
                 "RandomRotation":null,
-                "Grayscale":1,
+                "Grayscale":3,
                 "ToTensor":true,
                 "GrayToColor":false
             },
@@ -64,7 +64,7 @@
                 "RandomHorizontalFlip":null,
                 "RandomVerticalFlip":null,
                 "RandomRotation":null,
-                "Grayscale":1,
+                "Grayscale":3,
                 "ToTensor":true,
                 "GrayToColor":false
             }

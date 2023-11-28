@@ -162,6 +162,9 @@ with mlflow.start_run(run_name=run_name) as parent_run:
                 model = m.create_model(model_cfgs)
                 model = model.to(device)
                 
+                total_params = sum(p.numel() for p in model.parameters())
+                mlflow.log_param("total_parmas", total_params)
+                
                 params_train['optimizer'] = optim.Adam(model.parameters(), lr = lr)
                 params_train['lr_scheduler'] = ReduceLROnPlateau(params_train['optimizer'], patience = 2, factor = factor, threshold = threshold)
                 train_dataset = dataset.CreateImageDataset(label_set.iloc[train_idx], datapath, model_cfgs['datasets'], output_columns, train=True)

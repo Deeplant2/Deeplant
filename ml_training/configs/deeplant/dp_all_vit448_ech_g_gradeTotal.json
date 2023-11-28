@@ -7,7 +7,7 @@
         "threshold":0.03,
         "momentum":0.9,
         "weight_decay":5e-4,
-        "seed":42,
+        "seed":39778,
         "save_model":true,
         "eval_function":["MAE","ACC","R2S"],
         "cross_validation":5
@@ -48,7 +48,7 @@
         {
             "image_size":448,
             "isImage":true,
-            "input_column": 27,
+            "input_column": 26,
             "graph":null,
             "train_transform":{
                 "Resize":[448,448],
