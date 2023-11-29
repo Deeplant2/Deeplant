@@ -1,5 +1,4 @@
 import torch
-import timm
 import importlib
 
 def create_model(model_cfgs):

@@ -1,6 +1,3 @@
-# +
-from torch import nn
-
 import pandas as pd
 import numpy as np
 import sklearn
@@ -9,9 +6,6 @@ import os
 import mlflow
 import seaborn as sns
 import matplotlib.pyplot as plt
-
-
-# -
 
 class Accuracy():
     def __init__(self, length, num_classes, algorithm, columns_name, method = None):
@@ -178,7 +172,6 @@ class Metrics():
             result[self.metrics[i].getClassName()] = self.metrics[i].getDictResult()
         return result
 
-# +
 #########################################################################
 
 

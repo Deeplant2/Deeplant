@@ -1,12 +1,7 @@
-# +
 import torch
 import mlflow
-import numpy as np
 import metric as f
-
 from tqdm import tqdm
-from torch import nn
-# -
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
