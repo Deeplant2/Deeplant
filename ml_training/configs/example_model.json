@@ -25,7 +25,6 @@
             "image_size":448,
             "isImage":true,
             "input_column": 13,
-            "graph":null,
             "train_transform":{
                 "Resize":[448,448],
                 "RandomHorizontalFlip":0.5,

@@ -1,12 +1,12 @@
-import torch
-import mlflow
 import os
 import gc
+import torch
+import mlflow
 import numpy as np
 import pandas as pd
 
 from torch.utils.data import DataLoader
-from torch.utils.data import random_split, SubsetRandomSampler
+from torch.utils.data import random_split, SubsetRandomSamplerndomSampler
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
@@ -14,18 +14,14 @@ from sklearn.model_selection import KFold
 from torch import optim
 from torch import nn
 
-# +
 import train
-
 import models.make_model as m
 import utils.dataset as dataset
 import utils.loss as loss
 import utils.log as log
 import utils.data_dist as data_dist
-
 import argparse
 import json
-# -
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print(device)
@@ -161,6 +157,9 @@ with mlflow.start_run(run_name=run_name) as parent_run:
             for fold, (train_idx,val_idx) in enumerate(splits.split(np.arange(len(label_set)))):
                 model = m.create_model(model_cfgs)
                 model = model.to(device)
+                
+                total_params = sum(p.numel() for p in model.parameters())
+                mlflow.log_param("total_parmas", total_params)
                 
                 params_train['optimizer'] = optim.Adam(model.parameters(), lr = lr)
                 params_train['lr_scheduler'] = ReduceLROnPlateau(params_train['optimizer'], patience = 2, factor = factor, threshold = threshold)

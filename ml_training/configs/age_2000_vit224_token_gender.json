@@ -18,7 +18,7 @@
         "islogged":false,
         "num_classes":1,
         "pretrained":true,
-        "in_chans":4
+        "in_chans":3
     },
     "datasets":[
         {

@@ -35,9 +35,9 @@ class ECModel(nn.Module):
         for input in inputs:
             input = input.to(device)
             if x is None:
-                x = input[0:3]
+                x = input[:,0:3]
             else:
-                x += input[0:3]
+                x += input[:,0:3]
                 
         output = self.model_1(x)['out']
         output = self.fc_layer(output)

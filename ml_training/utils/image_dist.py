@@ -3,8 +3,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import io
 from PIL import Image
-import mlflow
-import seaborn as sns
 
 
 def drawColorGraph(name):

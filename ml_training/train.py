@@ -1,13 +1,7 @@
-# +
 import torch
 import mlflow
-import numpy as np
 import metric as f
-import utils.analyze as analyze
-
 from tqdm import tqdm
-from torch import nn
-# -
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -58,8 +52,8 @@ def classification_epoch(model, loss_func, dataset_dl, epoch, eval_function, num
     running_loss = 0.0
     len_data = len(dataset_dl.sampler)
 
-    incorrect_output = analyze.IncorrectOutput(columns_name=["1++","1+","1","2","3"])
-    confusion_matrix = analyze.ConfusionMatrix()
+    incorrect_output = f.IncorrectOutput(columns_name=["1++","1+","1","2","3"])
+    confusion_matrix = f.ConfusionMatrix()
     metrics = f.Metrics(eval_function, num_classes, 'regression', len_data, columns_name)
 
     for xb, yb, name_b in tqdm(dataset_dl):
@@ -151,7 +145,7 @@ def regression_epoch(model, loss_func, dataset_dl, epoch, num_classes, columns_n
     running_loss = 0.0
     len_data = len(dataset_dl.sampler)
     metrics = f.Metrics(eval_function, num_classes, 'regression', len_data, columns_name)
-    output_log = analyze.OutputLog(columns_name, num_classes)
+    output_log = f.OutputLog(columns_name, num_classes)
 
     for xb, yb, name_b in tqdm(dataset_dl):
         yb = yb.to(device)

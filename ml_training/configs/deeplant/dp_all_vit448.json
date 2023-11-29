@@ -7,7 +7,7 @@
         "threshold":0.03,
         "momentum":0.9,
         "weight_decay":5e-4,
-        "seed":42,
+        "seed":39778,
         "save_model":true,
         "eval_function":["MAE","ACC","R2S"],
         "cross_validation":5
@@ -19,6 +19,7 @@
         "num_classes":5,
         "pretrained":true,
         "in_chans":3
+        "pretrained":true
     },
     "datasets":[
         {
