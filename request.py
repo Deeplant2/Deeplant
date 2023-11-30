@@ -12,31 +12,32 @@ def send_request(image_path):
     print(f"Data received \t\t{datetime.now().time()}")
     try:
         result = response.json()
-        # print(result)
-        output = result.get("xai_gradeNum_imagePath")
+        # Response is valid
+        grade = result["gradeNum"]
+        marbling = round(result["marbling"],2)
+        color = round(result["color"],2)
+        texture = round(result["texture"],2)
+        surfaceMoisture = round(result["surfaceMoisture"],2)
+        total = round(result["overall"],2)
+        return grade, marbling, color, texture, surfaceMoisture, total
     except ValueError as e:
         print("Error: Invalid JSON response from the server.")
         print("Exception:", e)
         return None
 
-    if response.status_code == 200:
-        grade = response.json()["gradeNum"]
-        marbling = response.json()["marbling"]
-        color = response.json()["color"]
-        texture = response.json()["texture"]
-        surfaceMoisture = response.json()["surfaceMoisture"]
-        overall = response.json()["overall"]
-        return grade, marbling, color, texture, surfaceMoisture, overall
-    else:
-        print("Error: Failed to get a valid response from the server.")
+def main():
+    parser = argparse.ArgumentParser(description='Send image path as a request to the server.')
+    parser.add_argument('--image_path', type=str, default="https://xai-deeplant-image.s3.ap-northeast-2.amazonaws.com/meat_image.jpg", help='Path to the image')
+    args = parser.parse_args()
 
+    grade, marbling, color, texture, surfaceMoisture, total = send_request(args.image_path)
 
-# Usage example:
-image_path = "https://xai-deeplant-image.s3.ap-northeast-2.amazonaws.com/meat_image.jpg"
+    print(f"Grade: {grade}")
+    print(f"Marbling Score: {marbling}")
+    print(f"Color Score: {color}")
+    print(f"Texture Score: {texture}")
+    print(f"Surface Moisture Score: {surfaceMoisture}")
+    print(f"Total Score: {total}")
 
-## grade, marbling, color, texture, surfaceMoisture, overall
-grade, marbling, color, texture, surfaceMoisture, overall = send_request(
-    image_path
-)
-
-print(grade, marbling, color, texture, surfaceMoisture, overall)
+if __name__ == '__main__':
+    main()
