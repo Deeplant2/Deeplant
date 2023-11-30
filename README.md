@@ -10,7 +10,7 @@ python3 nohup app.py
 ```
 
 # Send request 로컬 -> 서버
-로컬에서 서버로 이미지의 경롤르 보내서 결과를 받아 볼 수 있다.
+로컬에서 서버로 이미지의 경로를 보내서 결과를 받아 볼 수 있다.
 이미지 경로는 AWS S3 버킷에 있는 이미지의 경로를 입력
 ```
 python3 request.py --image_path "https://xai-deeplant-image.s3.ap-northeast-2.amazonaws.com/meat_image.jpg"
