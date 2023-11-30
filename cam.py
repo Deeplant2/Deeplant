@@ -106,20 +106,6 @@ def visualize_all_vit_model(model, image, cam_type, img_size, target_classes):
 
         return visualizations
 
-        # num_classes = len(target_classes)
-        # fig, axs = plt.subplots(1, num_classes, figsize=(4 * num_classes, 8))
-
-        # # Display each target class visualization and gb visualization in separate subplots
-        # for i in range(num_classes):
-        #     axs[i].imshow(visualizations[i])
-        #     axs[i].axis("off")
-        #     axs[i].set_title(f"Target Class:")
-
-        # # Adjust the spacing between subplots
-        # plt.tight_layout()
-
-        # # Show the plot
-        # plt.show()
 
 
 # %%
@@ -174,6 +160,82 @@ def visualize_all_cnn_model(model, img_path, cam_type, img_size, target_classes)
             visualization = show_cam_on_image(
                 img_normalized, grayscale_cam, use_rgb=True
             )
+            visualizations.append(visualization)
+
+        return visualizations
+
+        
+def visualize_featurevit_model(model, image, cam_type, img_size, target_classes):
+    # Load the image
+    transform = transforms.Compose(
+        [
+            transforms.ToTensor(),
+        ]
+    )
+    input_tensor = transform(image).unsqueeze(0)
+    # Specify the target layers
+    target_layers = [model.vit_model.blocks[-1].norm1]
+
+    if cam_type == "GradCAM":
+        cam = GradCAM(
+            model=model,
+            target_layers=target_layers,
+            use_cuda=False,
+            reshape_transform=reshape_vit_transform,
+        )
+    elif cam_type == "ScoreCAM":
+        cam = [
+            ScoreCAM(
+                model=model,
+                target_layers=target_layers,
+                use_cuda=False,
+                reshape_transform=reshape_vit_transform,
+            )
+        ]
+    elif cam_type == "GradCAMPlusPlus":
+        cam = GradCAMPlusPlus(
+            model=model,
+            target_layers=target_layers,
+            use_cuda=False,
+            reshape_transform=reshape_vit_transform,
+        )
+    elif cam_type == "XGradCAM":
+        cam = XGradCAM(
+            model=model,
+            target_layers=target_layers,
+            use_cuda=False,
+            reshape_transform=reshape_vit_transform,
+        )
+    elif cam_type == "EigenCAM":
+        cam = EigenCAM(
+            model=model,
+            target_layers=target_layers,
+            use_cuda=False,
+            reshape_transform=reshape_vit_transform,
+        )
+
+    if target_classes == None:
+        # Target classes and titles
+        targets = None
+        grayscale_cam = cam(input_tensor=input_tensor, targets=targets)
+        grayscale_cam = grayscale_cam[0, :]
+        img_normalized = np.float32(image) / 255.0
+        visualization = show_cam_on_image(img_normalized, grayscale_cam, use_rgb=True)
+        visualization = visualization.tolist()
+        return visualization
+
+    else:
+        visualizations = []
+
+        for target_class in target_classes:
+            targets = [ClassifierOutputTarget(target_class)]
+            grayscale_cam = cam(input_tensor=input_tensor, targets=targets)
+            grayscale_cam = grayscale_cam[0, :]
+            img_normalized = np.float32(image) / 255.0
+            visualization = show_cam_on_image(
+                img_normalized, grayscale_cam, use_rgb=True
+            )
+            visualization = visualization.tolist()
             visualizations.append(visualization)
 
         return visualizations
