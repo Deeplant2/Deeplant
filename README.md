@@ -15,7 +15,7 @@ python3 nohup app.py
 python3 request.py --image_path "https://xai-deeplant-image.s3.ap-northeast-2.amazonaws.com/meat_image.jpg"
 ```
 
-##실행 예시
+## 실행 결과 예시
 ```
 Data sent               20:32:17.183380
 Data received           20:32:23.587630
