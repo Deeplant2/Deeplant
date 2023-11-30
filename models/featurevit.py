@@ -22,10 +22,6 @@ class CombinedModel(nn.Module):
             in_chans=272,
             img_size=224,
         )
-        # for name, param in self.vit_model.named_parameters():
-        #     if not name.startswith('head'):
-        #         param.requires_grad = False
-
     def forward(self, x):
         x = x.to(device)
         cnn_features = self.cnn_model(x)
