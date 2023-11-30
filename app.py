@@ -2,12 +2,14 @@ from flask import Flask, request, jsonify
 from torchvision.transforms import Compose, Resize, ToTensor
 from PIL import Image
 import torch
-from cam import visualize_all_vit_model
+from cam import visualize_all_vit_model, visualize_featurevit_model
 import boto3
 import io
 import numpy as np
 import requests
 from urllib.parse import urlparse
+import random
+import sys
 
 # Initialize the Flask app
 app = Flask(__name__)
@@ -117,12 +119,14 @@ class MLModel:
             sensory_model, image, cam_type, img_size, target_classes
         )
 
-        xai_gradeNum_imageName = "grade_xai.png"
-        xai_imageName = "sensory_xai.png"
+        rand_num = random.randint(1111, 9999)
+
+        xai_gradeNum_imageName = "grade_xai_" + str(rand_num) + ".png"
+        xai_imageName = "sensory_xai_" + str(rand_num) + ".png"
 
         self.save_image_to_s3(grade_visualizations, bucket_name, xai_gradeNum_imageName)
         self.save_image_to_s3(sensory_visualizations, bucket_name, xai_imageName)
-        bucketPath = "https://xai-deep-plant-image.s3.ap-northeast-2.amazonaws.com/"
+        bucketPath = "https://xai-deeplant-image.s3.ap-northeast-2.amazonaws.com/"
         xai_imagePath = bucketPath + xai_imageName
 
         xai_gradeNum_imagePath = bucketPath + xai_gradeNum_imageName
