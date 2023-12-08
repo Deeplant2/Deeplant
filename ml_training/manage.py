@@ -14,6 +14,7 @@ from torch import optim
 from torch import nn
 
 import train
+import test
 import models.make_model as m
 import utils.dataset as dataset
 import utils.loss as loss
@@ -66,6 +67,7 @@ run_name = args.run
 log_epoch = args.log_epoch
 sanity = args.sanity
 csv_name = args.csv_name
+mode = args.mode
 
 #Define data pathes
 datapath = args.data_path
@@ -77,17 +79,23 @@ print(columns_name)
 
 # Define Data loader
 
-if cross_validation == 0:
-    train_set, test_set = train_test_split(label_set, test_size=0.1, random_state= seed)
-    train_set.reset_index(inplace=True, drop=True)
-    test_set.reset_index(inplace=True, drop=True)
-    print(train_set)
-    print(test_set)
+# +
+if mode == 'train':
+    if cross_validation == 0:
+        train_set, test_set = train_test_split(label_set, test_size=0.1, random_state= seed)
+        train_set.reset_index(inplace=True, drop=True)
+        test_set.reset_index(inplace=True, drop=True)
+        print(train_set)
+        print(test_set)
 
-    train_dataset = dataset.CreateImageDataset(train_set, datapath, model_cfgs['datasets'], output_columns)
-    test_dataset = dataset.CreateImageDataset(test_set, datapath, model_cfgs['datasets'], output_columns)
-else:
-    splits = KFold(n_splits = cross_validation, shuffle = True, random_state = seed)
+        train_dataset = dataset.CreateImageDataset(train_set, datapath, model_cfgs['datasets'], output_columns)
+        test_dataset = dataset.CreateImageDataset(test_set, datapath, model_cfgs['datasets'], output_columns)
+    else:
+        splits = KFold(n_splits = cross_validation, shuffle = True, random_state = seed)
+        
+elif mode == 'test':
+    test_dataset = dataset.CreateImageDataset(label_set, datapath, model_cfgs['datasets'], output_columns)
+# -
 
 # ------------------------------------------------------
 
@@ -192,6 +200,25 @@ with mlflow.start_run(run_name=run_name) as parent_run:
                 del model
                 gc.collect()
             log.logFoldMean(train_loss_list, val_loss_list, train_metric_list, val_metric_list, eval_function, columns_name)
+            
+            
+    elif args.mode =='test':
+        model = m.create_model(model_cfgs)
+        model = model.to(device)
+
+        algorithm = model.getAlgorithm()
+        params_train['val_dl'] = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
+
+        if algorithm == 'classification':
+            params_train['columns_name'] = label_set[output_columns].unique()
+            model, _, _= train.classification(model, params_train)
+        elif algorithm == 'regression':
+            model, _, _ = train.regression(model, params_train)
+
+        model.cpu()
+        del model
+        gc.collect()
+
 
 
 
