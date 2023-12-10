@@ -18,6 +18,7 @@
 
 # Installation
 Ensure you have a python environment, `python=3.8.10` is recommended.
+cuda를 사용가능한 Nvdia GPU 추천. 
 ```sh
 pip install -r requirement.txt
 ```
@@ -42,7 +43,12 @@ pip install transformers datsets accelerate nvidia-ml-py3
 1. 'ml_training/models' 폴더에 custom model code를 적을 .py 파일 생성.
 2. pytorch 기반의 모델 클래스 제작.
 3. 모델 클래스의 forward 부분에 들어오는 입력 값이 list이므로 이 부분을 주의해서 코드 작성.
-4. 제작한 class를 return 하는 외부에서 접근 가능한 create_model() 함수 추가.
+4. 클래스 안에 getAlgorithm 함수 추가. `classification` or `regression` 리턴.
+5. 제작한 class를 return 하는 외부에서 접근 가능한 create_model() 함수 추가.
+
+## Configuration file 작성
+1. 아무 configuration file 복사.
+2. 시스템 설명서의 configuration file 설명을 보면서 상황에 맞게 작성.
 
 ## Create Custom Loss
 'ml_training/loss/loss.py'에 custom loss 코드 작성 권장. 
