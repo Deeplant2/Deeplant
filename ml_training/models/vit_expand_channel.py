@@ -5,6 +5,8 @@ import timm
 from torchvision.models.feature_extraction import create_feature_extractor
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
+# ViT 입력 채널을 4개로 확장시킨 후 4번째 채널에 다른 추가 정보를 넣는 모델.
+
 class LastModule(nn.Module):
     def __init__(self, in_chans, out_chans):
         super().__init__() 

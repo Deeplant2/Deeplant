@@ -1,14 +1,9 @@
-# +
 import torch
 import timm
-
 from torch import nn
-
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-
-# -
-
+# timm 모델을 불러오기만 하는 모델. regression 전용이다.
 class TimmModel(nn.Module):
     def __init__(self, model_name, num_classes, in_chans, pretrained):
         super(TimmModel,self).__init__()

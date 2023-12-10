@@ -5,8 +5,7 @@ import timm
 from torchvision.models.feature_extraction import create_feature_extractor
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-
-# +
+# 예측 값을 제외한 다른 catergory 데이터를 받아서 그 category 넘버를 ViT token으로 추가하는 모델.
 class TokenModel(nn.Module):
     def __init__(self, model_name, num_classes):
         super(TokenModel,self).__init__()
@@ -17,8 +16,7 @@ class TokenModel(nn.Module):
         
         self.cls_token = model.cls_token
         self.pos_embed = torch.concat([model.pos_embed[:,:1],model.pos_embed[:,:1],model.pos_embed[:,1:]],dim=1).to(device)
-        
-#         self.token_pos_embed = torch.nn.Parameter(torch.randn([1,1,768]) * .02)         
+              
         self.patch_embed = torch.nn.Sequential(*module_list[0:4])
         self.encoder = module_list[4]
         self.fc_norm = module_list[5]
@@ -50,8 +48,6 @@ class TokenModel(nn.Module):
     def getAlgorithm(self):
         return self.algorithm
 
-
-# -
 
 def create_model(model_name, num_classes, in_chans, pretrained):
     model = TokenModel(model_name, num_classes)
