@@ -17,7 +17,7 @@
 
 
 # Installation
-Ensure you have a python environment, `python=3.9` is recommended.
+Ensure you have a python environment, `python=3.8.10` is recommended.
 ```sh
 pip install -r requirement.txt
 ```
@@ -33,8 +33,22 @@ pip install transformers datsets accelerate nvidia-ml-py3
     ```
 2. Run model
     ```sh
-    python manage.py --run 'test' --name 'test'
+    python manage.py --run 'test' --ex 'test'
     ```
+
+# Additional.
+## Create Custom Model
+기본적인 pytorch 모델 제작법과 같다. pytorch 모델 제작법은 공식 document 참고.
+1. 'ml_training/models' 폴더에 custom model code를 적을 .py 파일 생성.
+2. pytorch 기반의 모델 클래스 제작.
+3. 모델 클래스의 forward 부분에 들어오는 입력 값이 list이므로 이 부분을 주의해서 코드 작성.
+4. 제작한 class를 return 하는 외부에서 접근 가능한 create_model() 함수 추가.
+
+## Create Custom Loss
+'ml_training/loss/loss.py'에 custom loss 코드 작성 권장. 
+
+## Add Image Transform Variation
+'ml_training/loss/transform.py'에 원하는 transform 추가 후 configuration file에서 사용.
 
 # 사용 모델
 * ViT
@@ -42,6 +56,14 @@ pip install transformers datsets accelerate nvidia-ml-py3
 * CoAtNet
 
 # 사용 데이터 셋
+## 등급 예측
+| Name | Data Type | Range |
+|---|---|---|
+|image src|string|
+|grade|string| 1++. 1+, 1, 2, 3|
+
+* 75000개의 AI-hub 육류 이미지 사용.
+## 맛 데이터 예측
 | Name | Data Type | Range |
 |---|---|---|
 |image src|string|
@@ -52,23 +74,46 @@ pip install transformers datsets accelerate nvidia-ml-py3
 |total|float|1 ~ 5|
 |grade|string| 1++. 1+, 1, 2, 3|
 
+* 1687개의 육류 이미지 사용.
+* 데이터 셋의 범위는 0 ~ 10으로 바뀔 예정이기 때문에 재학습 필수
 # 결과 및 성능
 ## 등급 예측
 ### CNN
 | Model | # Params | Accuracy |
 |---|---|---|
+|resnetrs152.tf_in1k|86M|0.974|
+|tf_efficientnetv2_l.in21k_ft_in1k|118M|0.977|
 ### ViT
 | Model | # Params | Accuracy |
 |---|---|---|
+vit_base_patch32_clip_448.laion2b_ft_in12k_in1k|88M|0.974|
 
 ## 맛 데이터 예측
 ### CNN
-| Model | # Params | R2 score |
+| Model | # Params | R2 score | Average acc. |
 |---|---|---|
+|resnetrs152.tf_in1k|86M|0.1|0.458|
 ### ViT
 | Model | # Params | R2 score |
 |---|---|---|
+|vit_base_patch16_clip_224.laion2b_ft_in12k_in1k|0.457|0.596|
+|vit_base_patch32_clip_448.laion2b_ft_in12k_in1k|0.463|0.607|
 ### CoAtNet
+| Model | # Params | R2 score |
+|---|---|---|
+### 통계 자료 활용 (add)
+| Model | # Params | R2 score |
+|---|---|---|
+
+### 통계 자료 활용 (channel extention)
+| Model | # Params | R2 score |
+|---|---|---|
+
+### Feature map ViT
+| Model | # Params | R2 score |
+|---|---|---|
+
+### CNN + SE block
 | Model | # Params | R2 score |
 |---|---|---|
 
