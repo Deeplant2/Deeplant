@@ -4,8 +4,6 @@ from torch import Tensor
 from numpy.typing import ArrayLike
 from denseweight import DenseWeight
 
-
-# +
 class DenseWeightMSELoss(nn.modules.loss._Loss):
     def __init__(self, alpha: float, y: ArrayLike, size_average=None, reduce=None, reduction: str = 'mean') -> None:
         super().__init__(size_average, reduce, reduction)
@@ -27,8 +25,5 @@ class DenseWeightMSELoss(nn.modules.loss._Loss):
             return torch.mean(weight.cuda() * nn.functional.mse_loss(input, target, reduction='none'))
         elif self.reduction == 'sum':
             return torch.sum(weight.cuda() * nn.functional.mse_loss(input, target, reduction='none'))
-        
-        
-# -
 
 

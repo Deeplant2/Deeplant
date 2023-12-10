@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import mlflow
 import seaborn as sns
 
-# +
 def logDatasetHistogram(train_df, val_df, columns, bins=10, width=0.25):
     fig = plt.figure(figsize=(10,5))
     for column in columns:

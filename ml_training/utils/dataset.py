@@ -4,7 +4,6 @@ from PIL import Image
 from torch.utils.data import Dataset
 import utils.transform as transform
 
-# +
 class CreateImageDataset(Dataset):
     def __init__(self, labels, img_dir, dataset_cfgs, output_columns, train=True):
 

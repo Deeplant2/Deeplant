@@ -92,7 +92,7 @@ class R2score():
         return r2_score
     
     def getDictResult(self):
-        return getResult()
+        return self.getResult()
     
     def getClassName(self):
         return "r2score"
@@ -119,7 +119,7 @@ class MeanAbsError():
         return self.cumulative_metric / self.length
     
     def getDictResult(self):
-        result = getResult()
+        result = self.getResult()
         dict_result = {}
         for i in range(self.num_classes):
             result[self.columns_name[i]] = result[i]
@@ -221,8 +221,6 @@ class IncorrectOutput():
         self.df.to_csv(f'temp/{filename}.csv')
         mlflow.log_artifact(f'temp/{filename}.csv', f'output_epoch_{epoch}')
 
-
-# +
 class ConfusionMatrix():
     '''
     Confusion Matrix for classification
@@ -237,7 +235,7 @@ class ConfusionMatrix():
     def update(self, output, yb):
         '''
         '''
-        predictions_conv = pred_b.numpy()
+        predictions_conv = output.numpy()
         labels_conv = yb.numpy()
         self.conf_pred.append(predictions_conv)
         self.conf_label.append(labels_conv)

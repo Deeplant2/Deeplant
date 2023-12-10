@@ -2,12 +2,16 @@ import mlflow
 import numpy as np
 
 
-# +
 def logArrayMlflow(name, array):
+    '''
+    array에 들어 있는 순서대로 mlflow에 저장.
+    Args:
+        name: mlflow에 기록될 이름.\n
+        array: 기록할 값이 들어있는 배열.
+    '''
     for i in range(len(array)):
         mlflow.log_metric(name, array[i], i)
-        
-        
+
 def convertEvalName(name):
     if name == "R2S":
         return "r2score"
@@ -22,6 +26,11 @@ def convertEvalName(name):
     
         
 def logFoldMean(train_loss, val_loss, train_metric, val_metric, eval_function, columns_name):
+    '''
+    fold별 기록을 모아서 평균 값을 mlflow에 기록하는 함수
+    Args:
+
+    '''
     train_loss = np.array(train_loss).mean(axis=0)
     val_loss = np.array(val_loss).mean(axis=0)
     logArrayMlflow("train loss", train_loss)
@@ -53,10 +62,3 @@ def logFoldMean(train_loss, val_loss, train_metric, val_metric, eval_function, c
         else:
             for i in range(len(columns_name)):
                 logArrayMlflow(f"val {convertEvalName(eval_function[j])} {columns_name[i]}", temp[:,i])
-    
-    
-    
-
-# -
-
-
