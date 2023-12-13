@@ -35,16 +35,22 @@ from pytorch_grad_cam import GuidedBackpropReLUModel
 
 
 class CAMVisualizer:
+    # 모델과 이미지 크기, cuda 사용을 정의한다
     def __init__(self, model, img_size=448, use_cuda=False):
         self.model = model
         self.img_size = img_size
         self.use_cuda = use_cuda
-
+        
+    # vit input에 맞게 tensor를 변경한다.
     def reshape_vit_transform(self, tensor, height=14, width=14):
         result = tensor[:, 1:, :].reshape(tensor.size(0), height, width, tensor.size(2))
         result = result.transpose(2, 3).transpose(1, 2)
         return result
-
+        
+    # vit 모델에서 xai image를 추출한다.
+    # 이미지 데이터와 cam 종류를 parameter로 가진다.
+    # target_classes를 None으로 주면 가장 스코어 값이 높은 xai 이미지를 반환한다. 여러 class를 설정하면 여러 class에 대한 xai 이미지가 반환된다.
+    # 리턴값은 xai 이미지에 대한 데이터로 plt를 이용해 열 수 있다.
     def visualize_vit_model(self, image, cam_type, target_classes=None):
         transform = transforms.Compose([transforms.ToTensor()])
         input_tensor = transform(image).unsqueeze(0)
@@ -86,7 +92,11 @@ class CAMVisualizer:
                 )
                 visualizations.append(visualization.tolist())
             return visualizations
-
+            
+    # cnn 모델에서 xai 이미지를 추출한다.
+    # 이미지 데이터와 cam 종류를 parameter로 가진다.
+    # target_classes를 None으로 주면 가장 스코어 값이 높은 xai 이미지를 반환한다. 여러 class를 설정하면 여러 class에 대한 xai 이미지가 반환된다.
+    # 리턴값은 xai 이미지에 대한 데이터로 plt를 이용해 열 수 있다.
     def visualize_cnn_model(self, img_path, cam_type, target_classes=None):
         img = Image.open(img_path)
         transform = transforms.Compose(
@@ -131,75 +141,17 @@ class CAMVisualizer:
                 visualizations.append(visualization.tolist())
             return visualizations
 
-
-# %%
-def visualize_cnn_model(model, img_path, cam_type, img_size, target_classes):
-    # Load the image
-    img = Image.open(img_path)
-
-    # Preprocess the image
-    transform = transforms.Compose(
-        [
-            transforms.Resize((img_size, img_size)),
-            transforms.ToTensor(),
-        ]
-    )
-    input_tensor = transform(img).unsqueeze(0)
-    img = img.resize((448, 448))
-
-    # Specify the target layers
-    target_layers = [model.layer4[-1]]
-
-    # GradCAM instances for each target layer
-    if cam_type == "GradCAM":
-        cam = GradCAM(model=model, target_layers=target_layers, use_cuda=False)
-    elif cam_type == "ScoreCAM":
-        cam = ScoreCAM(model=model, target_layers=target_layers, use_cuda=False)
-    elif cam_type == "GradCAMPlusPlus":
-        cam = GradCAMPlusPlus(model=model, target_layers=target_layers, use_cuda=False)
-    elif cam_type == "XGradCAM":
-        cam = XGradCAM(model=model, target_layers=target_layers, use_cuda=False)
-    elif cam_type == "EigenCAM":
-        cam = EigenCAM(model=model, target_layers=target_layers, use_cuda=False)
-
-    if target_classes == None:
-        # Target classes and titles
-        targets = None
-        grayscale_cam = cam(input_tensor=input_tensor, targets=targets)
-        grayscale_cam = grayscale_cam[0, :]
-        img_normalized = np.float32(img) / 255.0
-        visualization = show_cam_on_image(img_normalized, grayscale_cam, use_rgb=True)
-
-        visualization = visualization.tolist()
-        return visualization
-
-    else:
-        visualizations = []
-
-        for target_class in target_classes:
-            targets = [ClassifierOutputTarget(target_class)]
-            grayscale_cam = cam(input_tensor=input_tensor, targets=targets)
-            grayscale_cam = grayscale_cam[0, :]
-            img_normalized = np.float32(img) / 255.0
-            visualization = show_cam_on_image(
-                img_normalized, grayscale_cam, use_rgb=True
-            )
-            visualizations.append(visualization)
-
-        return visualizations
-
-
 # How to use
 visualizer = CAMVisualizer(model=vit_model, img_size=448, use_cuda=False)
+
 # Load an image you want to visualize
 image = Image.open("your_image.jpg")
 
 # Choose the CAM technique (e.g., "GradCAM") and optional target classes (None for top predicted class)
 # GradCAM, HiResCAM, ScoreCAM, GradCAMPlusPlus, AblationCAM, XGradCAM, EigenCAM, FullGrad
 cam_type = "GradCAM"
-target_classes = (
-    None  # Replace with a list of class indices if you want to target specific classes
-)
+target_classes = (None)
+
 visualization = visualizer.visualize_vit_model(image, cam_type, target_classes)
 for vis in visualization:
     plt.figure()
