@@ -97,40 +97,45 @@ vit_base_patch32_clip_448.laion2b_ft_in12k_in1k|88M|0.974|
 ## 맛 데이터 예측
 ### CNN
 | Model | # Params | R2 score | Average acc. |
-|---|---|---|
+|---|---|---|---|
 |resnetrs152.tf_in1k|86M|0.1|0.458|
 ### ViT
-| Model | # Params | R2 score |
-|---|---|---|
-|vit_base_patch16_clip_224.laion2b_ft_in12k_in1k|0.457|0.596|
-|vit_base_patch32_clip_448.laion2b_ft_in12k_in1k|0.463|0.607|
+| Model | # Params | R2 score | Average acc. |
+|---|---|---|---|
+|vit_base_patch16_clip_224.laion2b_ft_in12k_in1k|88M|0.457|0.596|
+|vit_base_patch32_clip_448.laion2b_ft_in12k_in1k|88M|0.463|0.607|
 ### CoAtNet
-| Model | # Params | R2 score |
-|---|---|---|
+| Model | # Params | R2 score | Average acc. |
+|---|---|---|---|
 ### 통계 자료 활용 (add)
-| Model | # Params | R2 score |
-|---|---|---|
+| Model | # Params | R2 score | Average acc. |
+|---|---|---|---|
 
 ### 통계 자료 활용 (channel extention)
-| Model | # Params | R2 score |
-|---|---|---|
+| Model | # Params | R2 score | Average acc. |
+|---|---|---|---|
 
 ### Feature map ViT
-| Model | # Params | R2 score |
-|---|---|---|
+| Model | # Params | R2 score | Average acc. |
+|---|---|---|---|
 
 ### CNN + SE block
-| Model | # Params | R2 score |
-|---|---|---|
+| Model | # Params | R2 score | Average acc. |
+|---|---|---|---|
 
-# Argument
-* --run (default: 'proto'): Set the run name.
-* --name (default: 'proto'): Set the experiment name.
-* --model_cfgs (default: 'configs/model_cfgs.json'): Set the path to the model-related configuration file.
-* --mode (default: 'train', choices: 'train', 'test'): Set the mode (train or test). Currently, only 'train' is supported.
-* --epochs (default: 10): Set the number of epochs.
-* --lr or --learning_rate (default: 1e-5): Set the learning rate.
-* --data_path (default: '/home/work/deeplant_data'): Set the data path.
+# manage.py Start Argument
+|args|용도|
+|---|---|
+|run|mlflow run 이름 설정|
+|ex, experiment|mlflow expriment 이름 설정|
+|model_cfgs|모델 configuration file 경로 설정|
+|mode|train or test 모드 설정|
+|epochs|학습 시 반복 횟수 설정|
+|log_epoch|몇번 반복 시 모델을 저장할 것인지 설정|
+|lr, learning_rate|학습 결과를 모델에 얼만큼 반영할 것인지 설정|
+|data_path|csv가 저장된 폴더의 경로|
+|csv_name|csv파일 이름|
+|sanity|True/False, True면 코드의 작동만 확인하기 위해 한 배치만 학습하고 나머지는 스킵함|
 
 # Reference
 
