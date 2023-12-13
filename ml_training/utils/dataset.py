@@ -5,8 +5,17 @@ from torch.utils.data import Dataset
 import utils.transform as transform
 
 class CreateImageDataset(Dataset):
+    '''
+    #1. 클래스 명: logDatasetHistogram \n
+    #2. 목적/용도: Custom dataset\n 
+    #3. Input parameters:\n
+    labels = 현재 dataset에 사용될 데이터 프레임.\n
+    img_dir = 이미지가 위치하는 폴더의 경로 manage.py의 input argument인 datapath가 들어간다. 이 경로와 labels에 적힌 image 경로를 합쳐서 image를 불러오는 데 사용한다.\n
+    dataset_cfgs = configuration file에서 datasets 부분\n
+    output_columns = configuration file에서 output_columns 부분.\n
+    train = train_transform을 사용할 지 valid_transform을 사용할지 결정하는 값.
+    '''
     def __init__(self, labels, img_dir, dataset_cfgs, output_columns, train=True):
-
         self.train_transforms, self.val_transforms = transform.create_transform(dataset_cfgs)
         self.image_sizes = []
         self.isImage = []

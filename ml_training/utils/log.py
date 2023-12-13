@@ -4,15 +4,24 @@ import numpy as np
 
 def logArrayMlflow(name, array):
     '''
-    array에 들어 있는 순서대로 mlflow에 저장.
-    Args:
-        name: mlflow에 기록될 이름.\n
-        array: 기록할 값이 들어있는 배열.
+    #1. 함수명: logArrayMlflow\n
+    #2. 목적/용도: 입력으로 받은 array를 mlflow에 기록하는 함수.\n 
+    #3. Input parameters:\n
+    name = mlflow에 저장될 metric 이름.\n
+    array = 1차원 배열로 mlflow에 저장될 데이터가 시간 순으로 적힌 배열.\n
     '''
     for i in range(len(array)):
         mlflow.log_metric(name, array[i], i)
 
 def convertEvalName(name):
+    '''
+    #1. 함수명: convertEvalName\n
+    #2. 목적/용도: eval_function에 적혀 있는 것을 더 직관적인 이름으로 변환하는 함수.\n 
+    #3. Input parameters:\n
+    name = eval_function에 적힌 이름.\n
+    #4. Output: 변환된 이름.\n
+    #5. 기타 참고사항: metric을 추가할 때마다 바꿔줘야 하는 불편함이 있다. eval_function의 이름을 그대로 쓸거면 삭제해도 문제없다.
+    '''
     if name == "R2S":
         return "r2score"
     elif name == "ACC":
@@ -27,9 +36,15 @@ def convertEvalName(name):
         
 def logFoldMean(train_loss, val_loss, train_metric, val_metric, eval_function, columns_name):
     '''
-    fold별 기록을 모아서 평균 값을 mlflow에 기록하는 함수
-    Args:
-
+    #1. 함수명: logFoldMean\n
+    #2. 목적/용도: cross validation 진행 시 전체 fold의 평균은 기록이 안 되므로 평균을 기록하기 위해 만든 함수\n 
+    #3. Input parameters:\n
+    train_loss = 각 fold의 train_loss가 기록된 리스트\n
+    val_loss = 각 fold의 val_loss가 기록된 리스트\n
+    train_metric = 각 fold의 train_metric이 기록된 리스트\n
+    val_metric = 각 fold의 val_metric이 기록된 리스트\n
+    eval_function = 모델 학습 시 사용된 metric 리스트. configuration file에 정의되어 있다.\n
+    columns_name = configuration file의 output_column의 이름.\n
     '''
     train_loss = np.array(train_loss).mean(axis=0)
     val_loss = np.array(val_loss).mean(axis=0)

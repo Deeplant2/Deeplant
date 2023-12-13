@@ -2,13 +2,28 @@ from torchvision import transforms
 import torch
 
 def grayscale_to_color(img):
+    '''
+    #1. 함수명: grayscale_to_color \n
+    #2. 목적/용도: 이미지의 dimension이 1개일 때 3개로 늘려주는 함수.\n 
+    #3. Input parameters:\n 
+    img: 이미지\n 
+    #4. Output : 3채널 이미지\n
+    #5. 기타 참고사항\n
+    '''
     if img.size(0) == 1:
         img = torch.cat([img,img,img], dim = 0)
     img = img[0:3]
     return img
 
 def create_transform(dataset_cfgs):
-    
+    '''
+    #1. 함수명: create_transform \n
+    #2. 목적/용도: dataset에 들어갈 transform을 만드는 함수\n 
+    #3. Input parameters:\n 
+    dataset_cfgs: configuration file의 datasets 부분\n 
+    #4. Output : train/valid transform 객체 리스트\n
+    #5. 기타 참고사항\n
+    '''
     train_transforms, val_transforms = [], []
     
     for dataset_cfg in dataset_cfgs:

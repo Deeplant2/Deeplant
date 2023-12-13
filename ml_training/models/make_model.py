@@ -2,7 +2,14 @@ import torch
 import importlib
 
 def create_model(model_cfgs):
-
+    '''
+    #1. 함수명: create_model \n
+    #2. 목적/용도: 모델 코드를 import해서 모델을 생성 후 manage.py에 모델을 return 하는 함수.\n 
+    #3. Input parameters: 
+    model_cfgs (dict type) = configuration file에서 models 부분을 입력으로 받는다.\n 
+    #4. Output : 모델 객체를 반환한다.\n
+    #5. 기타 참고사항\n
+    '''
     model_cfg = model_cfgs['models']
 
     module = model_cfg['module']

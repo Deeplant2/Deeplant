@@ -77,9 +77,8 @@ output_columns = model_cfgs['output_columns']
 columns_name = label_set.columns[output_columns].values
 print(columns_name)
 
-# Define Data loader
-
-# +
+# Define dataset
+# cross validation 사용 시 dataset은 아래에서 선언함.
 if mode == 'train':
     if cross_validation == 0:
         train_set, test_set = train_test_split(label_set, test_size=0.1, random_state= seed)
@@ -95,10 +94,9 @@ if mode == 'train':
         
 elif mode == 'test':
     test_dataset = dataset.CreateImageDataset(label_set, datapath, model_cfgs['datasets'], output_columns)
-# -
-
 # ------------------------------------------------------
 
+# mlflow 설정
 mlflow.set_tracking_uri('file:///home/work/model/multi_input_model/mlruns/')
 mlflow.set_experiment(experiment_name)
 
