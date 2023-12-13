@@ -7,6 +7,87 @@ import mlflow
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+class Metrics():
+    '''
+    #1. 클래스명: Metrics \n
+    #2. 목적/용도: 수치적인 metric을 선언하고 업데이트하는 클래스\n 
+    '''
+    def __init__(self,eval_function, num_classes, algorithm, data_length, columns_name):
+        '''
+        #1. 함수명: __init__ \n
+        #2. 목적/용도: 실제 metric 클래스를 선언함\n 
+        #3. Input parameters:\n
+        eval_function: 사용할 metric의 이름\n
+        num_classes: 예측 class 개수\n
+        algorithm: regression/classification\n
+        data_length: 총 데이터 개수\n
+        columns_name: 예측 class의 열 이름\n
+        '''
+        self.metrics = []
+        for f in eval_function:
+            if f == 'ACC':
+                self.metrics.append(Accuracy(data_length, num_classes, algorithm, columns_name))
+            elif f == 'R2S':
+                self.metrics.append(R2score(data_length))
+            elif f == 'MAE':
+                self.metrics.append(MeanAbsError(data_length, num_classes, columns_name))
+            elif f == 'FACC':
+                self.metrics.append(Accuracy(data_length, num_classes, algorithm, columns_name, 'floor'))
+            elif f == 'RACC':
+                self.metrics.append(Accuracy(data_length, num_classes, algorithm, columns_name, 'round'))
+
+    def update(self, output, yb):
+        '''
+        #1. 함수명: update \n
+        #2. 목적/용도: 선언한 metric 클래스들을 업데이트함\n 
+        #3. Input parameters:\n
+        output: 예측값\n
+        yb: 정답값\n
+        '''
+        for metric in self.metrics:
+            metric.update(output, yb)
+        
+    def getMetrics(self):
+        '''
+        #1. 함수명: getMetrics \n
+        #2. 목적/용도: 현재 선언된 metric 클래스들을 반환함\n
+        #3. Output: 리스트에 담긴 metric 클래스들. 
+        '''
+        return self.metrics
+    
+    def logMetrics(self, mode, epoch):
+        '''
+        #1. 함수명: logMetrics \n
+        #2. 목적/용도: mlflow에 현재 metric 클래스들의 결과를 저장함.\n
+        #3. Input parameters:\n
+        mode: train/valid\n
+        epoch: 현재 반복 횟수\n
+        '''
+        for metric in self.metrics:
+            metric.logMetric(mode, epoch)
+            
+    def getResults(self):
+        '''
+        #1. 함수명: getResults \n
+        #2. 목적/용도: 현재 metric 클래스들의 결과를 리스트에 담아 반환함.\n
+        #3. Output: 리스트에 담긴 metric 클래스들의 결과\n
+        '''
+        result = []
+        for metric in self.metrics:
+            result.append(metric.getResult())
+        return result 
+    
+    def getDictResults(self):
+        '''
+        #1. 함수명: getDictResults \n
+        #2. 목적/용도: 현재 metric 클래스들의 결과를 dictionary에 { 클래스 이름: 결과 } 형태로 반환함.\n
+        #3. Output: dictionary에 담긴 metric 클래스들의 결과\n
+        '''
+        result = {}
+        for i in range(len(self.metrics)):
+            result[self.metrics[i].getClassName()] = self.metrics[i].getDictResult()
+        return result
+    
 class Accuracy():
     def __init__(self, length, num_classes, algorithm, columns_name, method = None):
         self.num_classes = num_classes
@@ -134,43 +215,6 @@ class MeanAbsError():
             mlflow.log_metric(f"{mode} mae {self.columns_name[i]}", result[i], epoch)
 
 
-class Metrics():
-    def __init__(self,eval_function, num_classes, algorithm, data_length, columns_name):
-        self.metrics = []
-        for f in eval_function:
-            if f == 'ACC':
-                self.metrics.append(Accuracy(data_length, num_classes, algorithm, columns_name))
-            elif f == 'R2S':
-                self.metrics.append(R2score(data_length))
-            elif f == 'MAE':
-                self.metrics.append(MeanAbsError(data_length, num_classes, columns_name))
-            elif f == 'FACC':
-                self.metrics.append(Accuracy(data_length, num_classes, algorithm, columns_name, 'floor'))
-            elif f == 'RACC':
-                self.metrics.append(Accuracy(data_length, num_classes, algorithm, columns_name, 'round'))
-
-    def update(self, output, yb):
-        for metric in self.metrics:
-            metric.update(output, yb)
-        
-    def getMetrics(self):
-        return self.metrics
-    
-    def logMetrics(self, mode, epoch):
-        for metric in self.metrics:
-            metric.logMetric(mode, epoch)
-            
-    def getResults(self):
-        result = []
-        for metric in self.metrics:
-            result.append(metric.getResult())
-        return result 
-    
-    def getDictResults(self):
-        result = {}
-        for i in range(len(self.metrics)):
-            result[self.metrics[i].getClassName()] = self.metrics[i].getDictResult()
-        return result
 
 #########################################################################
 
@@ -262,10 +306,16 @@ class ConfusionMatrix():
 
 class OutputLog():
     '''
-    Only available in regression model
+    #1. 클래스명: OutputLog \n
+    #2. 목적/용도: 모델의 학습 과정에서 모델의 예측값을 모두 기록하는 클래스.\n 
     '''
     def __init__(self, columns_name: str, num_classes: int):
         '''
+        #1. 함수명: __init__ \n
+        #2. 목적/용도: dataframe의 column을 정의함.\n 
+        #3. Input parameters:\n
+        columns_name: 예측값들의 column name\n
+        num_classes: 예측 class 의 개수
         '''
         self.num_classes = num_classes
         self.columns_name = columns_name
@@ -278,6 +328,12 @@ class OutputLog():
 
     def update(self, output, yb, name_b):
         '''
+        #1. 함수명: update \n
+        #2. 목적/용도: 모델의 예측값과 결과값을 기존의 dataframe에 이어붙임.\n 
+        #3. Input parameters:\n
+        output: 모델의 예측값\n
+        yb: 정답값\n
+        name_b: 이미지의 파일명\n
         '''
         output = output.detach().cpu().numpy()
         yb = yb.cpu().numpy()
@@ -300,6 +356,11 @@ class OutputLog():
 
     def logMetric(self, epoch: int, opt):
         '''
+        #1. 함수명: logMetric \n
+        #2. 목적/용도: 만든 dataframe을 mlflow에 저장함.\n 
+        #3. Input parameters:\n
+        epoch: 현재 반복 횟수\n
+        opt: train과 valid를 구분하는 값.\n
         '''
         if opt is None:
             if not os.path.exists('temp'):
@@ -315,6 +376,8 @@ class OutputLog():
             
     def getOutputLog(self):
         '''
+        #1. 함수명: getOutputLog \n
+        #2. 목적/용도: 만든 dataframe을 반환함.\n 
         '''
         return self.df
 

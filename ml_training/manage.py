@@ -100,7 +100,7 @@ elif mode == 'test':
 mlflow.set_tracking_uri('file:///home/work/model/multi_input_model/mlruns/')
 mlflow.set_experiment(experiment_name)
 
-# Start running
+# mlflow를 시작 
 with mlflow.start_run(run_name=run_name) as parent_run:
     print(parent_run.info.run_id)
     mlflow.log_dict(model_cfgs, 'config/configs.json')
@@ -216,8 +216,5 @@ with mlflow.start_run(run_name=run_name) as parent_run:
         model.cpu()
         del model
         gc.collect()
-
-
-
 
 torch.cuda.empty_cache()
