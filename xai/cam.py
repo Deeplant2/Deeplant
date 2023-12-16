@@ -9,6 +9,7 @@ import timm
 import cv2
 import matplotlib.ticker as ticker
 import torch.nn.functional as F
+import argparse
 
 from torchvision.transforms import ToTensor
 from pathlib import Path
@@ -34,18 +35,39 @@ from pytorch_grad_cam.utils.image import (
 from pytorch_grad_cam import GuidedBackpropReLUModel
 
 
+
 class CAMVisualizer:
     # 모델과 이미지 크기, cuda 사용을 정의한다
-    def __init__(self, model, img_size=448, use_cuda=False):
-        self.model = model
+    def __init__(self, model_url, img_url, img_size=448, use_cuda=False):
+        self.model = self.load_model_from_url(model_url)
+        self.img_url = img_url
         self.img_size = img_size
-        self.use_cuda = use_cuda
+        self.use_cuda = use_cuda and torch.cuda.is_available()
+
+    # 모델 경로를 통해 모델을 load한다.
+    def load_model_from_url(self, model_url):
+        # Assuming the model URL points to a PyTorch state dict
+        model_state_dict = torch.hub.load_state_dict_from_url(model_url)
+        model = create_model()  # Replace this with your actual model creation function
+        model.load_state_dict(model_state_dict)
+        if self.use_cuda:
+            model = model.cuda()
+        model.eval()
+        return model
+
+    # 이미지 경로를 통해 이미지를 읽어 정보를 반환한다.
+    def load_image_from_url(self):
+        response = requests.get(self.img_url)
+        image = Image.open(BytesIO(response.content))
+        return image
         
     # vit input에 맞게 tensor를 변경한다.
     def reshape_vit_transform(self, tensor, height=14, width=14):
         result = tensor[:, 1:, :].reshape(tensor.size(0), height, width, tensor.size(2))
         result = result.transpose(2, 3).transpose(1, 2)
         return result
+
+    
         
     # vit 모델에서 xai image를 추출한다.
     # 이미지 데이터와 cam 종류를 parameter로 가진다.
@@ -141,16 +163,27 @@ class CAMVisualizer:
                 visualizations.append(visualization.tolist())
             return visualizations
 
-# How to use
-visualizer = CAMVisualizer(model=vit_model, img_size=448, use_cuda=False)
+# Parse command-line arguments
+parser = argparse.ArgumentParser(description='Visualize XAI images using CAM techniques.')
+parser.add_argument('--image_path', type=str, required=True, help='Path to the input image.')
+parser.add_argument('--model_path', type=str, required=True, help='Path to the model.')
 
-# Load an image you want to visualize
-image = Image.open("your_image.jpg")
+args = parser.parse_args()
 
-# Choose the CAM technique (e.g., "GradCAM") and optional target classes (None for top predicted class)
-# GradCAM, HiResCAM, ScoreCAM, GradCAMPlusPlus, AblationCAM, XGradCAM, EigenCAM, FullGrad
+# Load the image
+try:
+    image = Image.open(args.image_path)
+except Exception as e:
+    print(f"Error opening image: {e}")
+    exit(1)
+    
+# Instantiate the visualizer with the model path and image path
+visualizer = CAMVisualizer(model_path=args.model_path, img_path=args.image_path, use_cuda=False)
+
+# Choose the CAM technique and optional target classes (None for top predicted class)
 cam_type = "GradCAM"
-target_classes = (None)
+target_classes = None
+
 
 visualization = visualizer.visualize_vit_model(image, cam_type, target_classes)
 for vis in visualization:
