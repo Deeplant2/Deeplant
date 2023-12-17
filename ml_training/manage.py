@@ -91,7 +91,7 @@ if mode == 'train':
         test_dataset = dataset.CreateImageDataset(test_set, datapath, model_cfgs['datasets'], output_columns)
     else:
         splits = KFold(n_splits = cross_validation, shuffle = True, random_state = seed)
-        
+
 elif mode == 'test':
     test_dataset = dataset.CreateImageDataset(label_set, datapath, model_cfgs['datasets'], output_columns)
 # ------------------------------------------------------
@@ -180,7 +180,6 @@ with mlflow.start_run(run_name=run_name) as parent_run:
                     print(f"Fold {fold+1}: {run.info.run_id}")
                     data_dist.logDatasetHistogram(label_set.iloc[train_idx], label_set.iloc[val_idx], columns_name)
                     if algorithm == 'classification':
-                        params_train['columns_name'] = label_set[columns_name[0]].unique()
                         params_train['loss_func'] = nn.CrossEntropyLoss()
                         mlflow.log_param("loss_func", params_train['loss_func'])
                         model, train_loss, val_loss, train_metric, val_metric = train.classification(model, params_train)
@@ -208,7 +207,6 @@ with mlflow.start_run(run_name=run_name) as parent_run:
         params_train['val_dl'] = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
 
         if algorithm == 'classification':
-            params_train['columns_name'] = label_set[output_columns].unique()
             model = test.classification(model, params_train)
         elif algorithm == 'regression':
             model = test.regression(model, params_train)
