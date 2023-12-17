@@ -6,6 +6,14 @@ from tqdm import tqdm
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def classification(model, params):
+    '''
+    #1. 함수명: classification\n
+    #2. 목적/용도: classification을 수행하는 함수\n 
+    #3. Input parameters:\n
+    model: 학습에 사용될 모델\n 
+    params: 학습 파라미터가 담긴 dictionary\n
+    #4. Output: 모델 및 모든 epoch의 결과가 담긴 list\n
+    '''
     num_epochs=params['num_epochs']
     loss_func=params['loss_func']
     optimizer=params['optimizer']
@@ -49,6 +57,21 @@ def classification(model, params):
 
 # calculate the loss per epochs
 def classification_epoch(model, loss_func, dataset_dl, epoch, eval_function, num_classes, columns_name, sanity=False, opt=None):
+    '''
+    #1. 함수명: classification_epoch\n
+    #2. 목적/용도: classification의 한 반복을 수행하는 함수\n 
+    #3. Input parameters:\n
+    model: 테스트에 사용될 모델\n
+    loss_func: loss 함수\n
+    dataset_dl: 데이터 로더\n
+    epoch: 현재 반복 횟수\n
+    eval_function: 수치적으로 평가할 metric 이름\n
+    num_classes: 예측열의 개수\n
+    columns_name: 예측열의 이름.\n
+    sanity: 코드 테스트를 위한 flag. true면 1배치만 실행하고 나머지는 스킵함.\n
+    opt: 학습 최적화에 사용되는 객체. validation일 땐 안 쓰임.\n.
+    #4. Output: loss 및 metric 결과\n
+    '''
     running_loss = 0.0
     len_data = len(dataset_dl.sampler)
 
@@ -97,6 +120,14 @@ def classification_epoch(model, loss_func, dataset_dl, epoch, eval_function, num
 
 
 def regression(model, params):
+    '''
+    #1. 함수명: regression\n
+    #2. 목적/용도: regression을 수행하는 함수\n 
+    #3. Input parameters:\n
+    model: 학습에 사용될 모델\n 
+    params: 학습 파라미터가 담긴 dictionary\n
+    #4. Output: 모델 및 모든 epoch의 결과가 담긴 list\n
+    '''
     num_epochs=params['num_epochs']
     loss_func=params['loss_func']
     optimizer=params['optimizer']
@@ -142,6 +173,21 @@ def regression(model, params):
 
 # calculate the loss per epochs
 def regression_epoch(model, loss_func, dataset_dl, epoch, num_classes, columns_name, eval_function, sanity=False, opt=None):
+    '''
+    #1. 함수명: regression_epoch\n
+    #2. 목적/용도: regression의 한 반복을 수행하는 함수\n 
+    #3. Input parameters:\n
+    model: 테스트에 사용될 모델\n
+    loss_func: loss 함수\n
+    dataset_dl: 데이터 로더\n
+    epoch: 현재 반복 횟수\n
+    eval_function: 수치적으로 평가할 metric 이름\n
+    num_classes: 예측열의 개수\n
+    columns_name: 예측열의 이름.\n
+    sanity: 코드 테스트를 위한 flag. true면 1배치만 실행하고 나머지는 스킵함.\n
+    opt: 학습 최적화에 사용되는 객체. validation일 땐 안 쓰임.\n.
+    #4. Output: loss 및 metric 결과\n
+    '''
     running_loss = 0.0
     len_data = len(dataset_dl.sampler)
     metrics = f.Metrics(eval_function, num_classes, 'regression', len_data, columns_name)
@@ -171,12 +217,32 @@ def regression_epoch(model, loss_func, dataset_dl, epoch, num_classes, columns_n
 
 
 def printResults(train_loss, train_metrics, val_loss, val_metrics):
+    '''
+    #1. 함수명: printResults\n
+    #2. 목적/용도: loss 및 metric결과를 콘솔창에 출력하는 함수\n 
+    #3. Input parameters:\n
+    train_loss: train loss 결과\n
+    train_metrics: train metric 결과\n
+    val_loss: valid loss 결과\n
+    val_metrics: valid metric 결과\n
+    '''
     print('The Training Loss is {} and the Validation Loss is {}'.format(train_loss, val_loss))
     for train_metric, val_metric in zip(train_metrics.getMetrics(), val_metrics.getMetrics()):
         print(f'The Training {train_metric.getClassName()} is {train_metric.getResult()} and the Validation {val_metric.getClassName()} is {val_metric.getResult()}')
 
 
 def saveModel(model, epoch, log_epoch, val_loss, best_loss):
+    '''
+    #1. 함수명: saveModel\n
+    #2. 목적/용도: 모델을 mlflow에 저장하는 함수\n 
+    #3. Input parameters:\n
+    model: 학습에 사용중인 모델\n
+    epoch: 현재 반복 횟수\n
+    log_epoch: 몇 epoch마다 모델을 저장할지 정하는 주기\n
+    val_loss: valid loss 결과\n
+    best_loss: 지금까지의 loss 중 가장 낮은 loss\n
+    #4. Output: best loss.\n
+    '''
     if epoch % log_epoch == log_epoch-1:
         mlflow.pytorch.log_model(model, f'model_epoch_{epoch}')
     #saving best model
