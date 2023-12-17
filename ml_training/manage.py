@@ -209,9 +209,9 @@ with mlflow.start_run(run_name=run_name) as parent_run:
 
         if algorithm == 'classification':
             params_train['columns_name'] = label_set[output_columns].unique()
-            model, _, _= train.classification(model, params_train)
+            model = test.classification(model, params_train)
         elif algorithm == 'regression':
-            model, _, _ = train.regression(model, params_train)
+            model = test.regression(model, params_train)
 
         model.cpu()
         del model

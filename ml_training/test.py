@@ -1,5 +1,4 @@
 import torch
-import mlflow
 import metric as f
 from tqdm import tqdm
 
@@ -12,24 +11,20 @@ def classification(model, params):
     eval_function=params['eval_function']
     sanity=params['sanity']
 
-    val_loss_list, val_metric_list =[], []
     for epoch in tqdm(range(num_epochs)):
         #validation
         model.eval()
         with torch.no_grad():
             val_metrics= classification_epoch(model, val_dl, epoch, eval_function, 1, columns_name, sanity)
-        val_metric_list.append(val_metrics.getResults())
         val_metrics.logMetrics("val", epoch)
-        printResults(val_loss, val_metrics)
+        printResults(val_metrics)
 
-    return model, val_loss_list, val_metric_list
+    return model
 
 
 # calculate the loss per epochs
 def classification_epoch(model, dataset_dl, epoch, eval_function, num_classes, columns_name, sanity=False):
-    running_loss = 0.0
     len_data = len(dataset_dl.sampler)
-
     incorrect_output = f.IncorrectOutput(columns_name=["1++","1+","1","2","3"])
     confusion_matrix = f.ConfusionMatrix()
     metrics = f.Metrics(eval_function, num_classes, 'regression', len_data, columns_name)
@@ -59,22 +54,19 @@ def regression(model, params):
     eval_function=params['eval_function']
     sanity=params['sanity']
     
-    val_loss_list, val_metric_list =[], []
     for epoch in tqdm(range(num_epochs)):
         #validation
         model.eval()
         with torch.no_grad():
             val_metrics = regression_epoch(model, val_dl, epoch, num_classes, columns_name, eval_function, sanity)
-        val_metric_list.append(val_metrics.getResults())
         val_metrics.logMetrics("val", epoch)
-        printResults(val_loss, val_metrics)
+        printResults(val_metrics)
 
-    return model, val_loss_list, val_metric_list
+    return model
 
 
 # calculate the loss per epochs
-def regression_epoch(model, loss_func, dataset_dl, epoch, num_classes, columns_name, eval_function, sanity=False, opt=None):
-    running_loss = 0.0
+def regression_epoch(model, dataset_dl, epoch, num_classes, columns_name, eval_function, sanity=False, opt=None):
     len_data = len(dataset_dl.sampler)
     metrics = f.Metrics(eval_function, num_classes, 'regression', len_data, columns_name)
     output_log = f.OutputLog(columns_name, num_classes)
@@ -89,9 +81,9 @@ def regression_epoch(model, loss_func, dataset_dl, epoch, num_classes, columns_n
             break
         
     output_log.logMetric(epoch, opt)
-    return loss, metrics
+    return metrics
 
 
-def printResults(train_loss, train_metrics, val_loss, val_metrics):
-    for val_metric in zipval_metrics.getMetrics():
+def printResults(val_metrics):
+    for val_metric in val_metrics.getMetrics():
         print(f'Validation {val_metric.getClassName()} is {val_metric.getResult()}')
