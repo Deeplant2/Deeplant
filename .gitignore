@@ -2,5 +2,4 @@ mlruns
 __pycache__
 .ipynb_checkpoints
 temp
-*.sh
 *.pth
