@@ -7,10 +7,11 @@ import mlflow
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+
 class Metrics():
     '''
     #1. 클래스명: Metrics \n
-    #2. 목적/용도: 수치적인 metric을 선언하고 업데이트하는 클래스\n 
+    #2. 목적/용도: 수치적인 metric을 선언하고 업데이트하는 클래스. accuracy, r2score, mae가 있음.\n
     '''
     def __init__(self,eval_function, num_classes, algorithm, data_length, columns_name):
         '''
@@ -89,7 +90,22 @@ class Metrics():
         return result
     
 class Accuracy():
+    '''
+    #1. 클래스명: Accuracy \n
+    #2. 목적/용도: 정확도를 계산하는 클래스\n
+    #3. 기타 참고사항: classification과 regression 둘다 사용 가능. 
+    '''
     def __init__(self, length, num_classes, algorithm, columns_name, method = None):
+        '''
+        #1. 함수명: __init__ \n
+        #2. 목적/용도: 실제 Accuracy 클래스를 선언함\n 
+        #3. Input parameters:\n
+        length: 총 데이터 개수\n
+        num_classes: 예측 class 개수\n
+        algorithm: regression/classification\n
+        columns_name: 예측 class의 열 이름\n
+        method: 정확도를 계산할 때 예측값과 정답값에 어떤 조작을 가할지 정하는 것. 현재는 round/floor/none이 있음.
+        '''
         self.num_classes = num_classes
         self.length = length
         self.algorithm = algorithm
@@ -127,7 +143,7 @@ class Accuracy():
         return self.cumulative_metric / self.length
     
     def getDictResult(self):
-        result = getResult()
+        result = self.getResult()
         dict_result = {}
         for i in range(self.num_classes):
             result[self.columns_name[i]] = result[i]
@@ -147,7 +163,18 @@ class Accuracy():
 
 
 class R2score():
+    '''
+    #1. 클래스명: R2score \n
+    #2. 목적/용도: R2 score 계산하는 클래스\n 
+    #3. 기타 참고사항: regression만 사용 가능. 
+    '''
     def __init__(self, length):
+        '''
+        #1. 함수명: __init__ \n
+        #2. 목적/용도: 실제 R2score 클래스를 선언함\n 
+        #3. Input parameters:\n
+        length: 총 데이터 개수\n
+        '''
         self.length = length
         self.cumulative_y = None
         self.cumulative_output = None
@@ -183,7 +210,20 @@ class R2score():
 
 
 class MeanAbsError():
+    '''
+    #1. 클래스명: MeanAbsError \n
+    #2. 목적/용도: MAE를 계산하는 클래스\n
+    #3. 기타 참고사항: regression만 사용 가능. 
+    '''
     def __init__(self, length, num_classes, columns_name):
+        '''
+        #1. 함수명: __init__ \n
+        #2. 목적/용도: 실제 MeanAbsError 클래스를 선언함\n 
+        #3. Input parameters:\n
+        length: 총 데이터 개수\n
+        num_classes: 예측 class 개수\n
+        columns_name: 예측 class의 열 이름\n
+        '''
         self.num_classes = num_classes
         self.cumulative_metric = np.zeros(num_classes)
         self.length = length
@@ -220,21 +260,34 @@ class MeanAbsError():
 
 
 class IncorrectOutput():
-    def __init__(self, columns_name: str):
+    '''
+    #1. 클래스명: IncorrectOutput \n
+    #2. 목적/용도: 예측을 틀린 이미지와 그 예측값을 csv파일에 저장하는 클래스\n
+    #3. 기타 참고사항: classification만 사용 가능. 
+    '''
+    def __init__(self, class_name: str):
         '''
-        Args:
-            columns_name: 
+        #1. 함수명: __init__ \n
+        #2. 목적/용도: 실제 IncorrectOutput 클래스를 선언함\n 
+        #3. Input parameters:\n
+        length: 총 데이터 개수\n
+        class_name: 예측 class의 unique 값들의 이름\n
         '''
-        
-        self.columns_name = columns_name
+        self.class_name = class_name
         columns = ['file_name']
-        for i in range(len(columns_name)):
-            columns.append(columns_name[i])
+        for i in range(len(class_name)):
+            columns.append(class_name[i])
         columns.append("predict")
         self.df = pd.DataFrame(columns=columns)
 
     def update(self, output, yb, name_b):
         '''
+        #1. 함수명: update \n
+        #2. 목적/용도: 예측값과 정답값을 비교하여 틀린 값을 dataFrame에 저장함.\n 
+        #3. Input parameters:\n
+        output: 예측값\n
+        yb: 정답값\n
+        name_b: 이미지 파일 이름.
         '''
         scores, pred_b = torch.max(output.data,1)
         index = torch.nonzero((pred_b != yb)).squeeze().tolist()
@@ -249,9 +302,9 @@ class IncorrectOutput():
             # class 개수 1개면 문제 생겨서 나눔.
             if len(output[0]) != 1:
                 for j in range(len(output[0])):
-                    data[self.columns_name[j]] = output[i][j]
+                    data[self.class_name[j]] = output[i][j]
             else:
-                data[self.columns_name[0]] = output[i]
+                data[self.class_name[0]] = output[i]
             data['score'] = scores[i]
             data['predict'] = pred_b[i]
             new_row = pd.DataFrame(data=data, index=['file_name'])
@@ -259,6 +312,11 @@ class IncorrectOutput():
 
     def logMetric(self, epoch: int, filename: str = "incorrect_output.csv"):
         '''
+        #1. 함수명: logMetric \n
+        #2. 목적/용도: mlflow에 현재까지의 dataframe을 csv형태로 저장함.\n 
+        #3. Input parameters:\n
+        epoch: 현재 반복 횟수\n
+        filename: 저장할 csv 파일 이름\n
         '''
         if not os.path.exists('temp'):
             os.mkdir('temp')
@@ -267,10 +325,14 @@ class IncorrectOutput():
 
 class ConfusionMatrix():
     '''
-    Confusion Matrix for classification
+    #1. 클래스명: ConfusionMatrix \n
+    #2. 목적/용도: confunsion matrix를 그리는 클래스\n
+    #3. 기타 참고사항: classification만 사용 가능. 
     '''
     def __init__(self):
         '''
+        #1. 함수명: __init__ \n
+        #2. 목적/용도: 실제 ConfusionMatrix 클래스를 선언함\n 
         '''
         self.conf_pred = []
         self.conf_label = []
@@ -278,6 +340,11 @@ class ConfusionMatrix():
 
     def update(self, output, yb):
         '''
+        #1. 함수명: update \n
+        #2. 목적/용도: 예측값과 정답값을 비교하여 confusion matrix 제작.\n 
+        #3. Input parameters:\n
+        output: 예측값\n
+        yb: 정답값\n
         '''
         predictions_conv = output.numpy()
         labels_conv = yb.numpy()
@@ -287,6 +354,10 @@ class ConfusionMatrix():
 
     def logMetric(self, epoch: int):
         '''
+        #1. 함수명: logMetric \n
+        #2. 목적/용도: mlflow에 현재까지의 confusion matrix를 저장함.\n 
+        #3. Input parameters:\n
+        epoch: 현재 반복 횟수\n
         '''
         new_pred = np.concatenate(self.conf_pred)
         new_label = np.concatenate(self.conf_label)
