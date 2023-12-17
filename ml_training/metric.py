@@ -88,7 +88,7 @@ class Metrics():
         for i in range(len(self.metrics)):
             result[self.metrics[i].getClassName()] = self.metrics[i].getDictResult()
         return result
-    
+
 class Accuracy():
     '''
     #1. 클래스명: Accuracy \n
@@ -256,7 +256,7 @@ class MeanAbsError():
 
 
 
-#########################################################################
+# ########################################################################
 
 
 class IncorrectOutput():
@@ -293,9 +293,9 @@ class IncorrectOutput():
         index = torch.nonzero((pred_b != yb)).squeeze().tolist()
         if not isinstance(index, list):
             index = [index]  # index가 단일 값인 경우에 리스트로 변환하여 처리
-        pred_b = pred_b.numpy()
-        scores = scores.numpy()
-        output = list(output.numpy())
+        pred_b = pred_b.cpu().numpy()
+        scores = scores.cpu().numpy()
+        output = list(output.detach().cpu().numpy())
         name_b = list(name_b)
         for i in index:
             data = {'file_name':name_b[i]}
@@ -346,8 +346,9 @@ class ConfusionMatrix():
         output: 예측값\n
         yb: 정답값\n
         '''
-        predictions_conv = output.numpy()
-        labels_conv = yb.numpy()
+        scores, pred_b = torch.max(output.data,1)
+        predictions_conv = pred_b.cpu().numpy()
+        labels_conv = yb.cpu().numpy()
         self.conf_pred.append(predictions_conv)
         self.conf_label.append(labels_conv)
 
@@ -364,7 +365,7 @@ class ConfusionMatrix():
         con_mat=sklearn.metrics.confusion_matrix(new_label, new_pred)
 
         cfs=sns.heatmap(con_mat,annot=True)
-        cfs.set(title='Confusion Matrix', ylabel='True lable', xlabel='Predict label')
+        cfs.set(title='Confusion Matrix', ylabel='True label', xlabel='Predict label')
         figure = cfs.get_figure()
         
         # Save the plot as an image
@@ -372,7 +373,7 @@ class ConfusionMatrix():
         
         #close figure
         plt.clf()
-        
+
         
 
 class OutputLog():

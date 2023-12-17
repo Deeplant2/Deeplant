@@ -48,7 +48,7 @@ def classification_epoch(model, dataset_dl, epoch, eval_function, num_classes, c
     len_data = len(dataset_dl.sampler)
     incorrect_output = f.IncorrectOutput(class_name=["1++","1+","1","2","3"])
     confusion_matrix = f.ConfusionMatrix()
-    metrics = f.Metrics(eval_function, num_classes, 'regression', len_data, columns_name)
+    metrics = f.Metrics(eval_function, num_classes, 'classification', len_data, columns_name)
 
     for xb, yb, name_b in tqdm(dataset_dl):
         yb = yb.to(device).long()

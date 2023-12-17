@@ -26,6 +26,7 @@ def classification(model, params):
     save_model=params['save_model']
     sanity=params['sanity']
 
+    best_loss = -1
     train_loss_list, val_loss_list, train_metric_list, val_metric_list =[], [], [], []
     for epoch in tqdm(range(num_epochs)):
 
@@ -75,9 +76,9 @@ def classification_epoch(model, loss_func, dataset_dl, epoch, eval_function, num
     running_loss = 0.0
     len_data = len(dataset_dl.sampler)
 
-    incorrect_output = f.IncorrectOutput(columns_name=["1++","1+","1","2","3"])
+    incorrect_output = f.IncorrectOutput(class_name=["1++","1+","1","2","3"])
     confusion_matrix = f.ConfusionMatrix()
-    metrics = f.Metrics(eval_function, num_classes, 'regression', len_data, columns_name)
+    metrics = f.Metrics(eval_function, num_classes, 'classification', len_data, columns_name)
 
     for xb, yb, name_b in tqdm(dataset_dl):
         yb = yb.to(device).long()
