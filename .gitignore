@@ -1,7 +1,5 @@
-*.csv
 mlruns
 __pycache__
-data
 .ipynb_checkpoints
 temp
 *.sh
