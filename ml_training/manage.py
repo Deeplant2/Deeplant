@@ -36,9 +36,9 @@ parser.add_argument('--mode', default='train', type=str, choices=('train', 'test
 parser.add_argument('--epochs', default=10, type=int)  #epochs
 parser.add_argument('--log_epoch', default=10, type=int)  # save model per log epochs
 parser.add_argument('--lr', '--learning_rate', default=1e-5, type=float)  # learning rate
-parser.add_argument('--data_path', default='/home/work/deeplant_data', type=str)  # data path
+parser.add_argument('--data_path', default='../data', type=str)  # data path
 parser.add_argument('--sanity', default=False, type=bool) # test mode
-parser.add_argument('--csv_name', default='new_train.csv')
+parser.add_argument('--csv_name', default='train.csv')
 args=parser.parse_args()
 
 # -----------------------------------------------------------------------------------------------------------------
