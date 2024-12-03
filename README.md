@@ -83,15 +83,11 @@ pip install transformers datsets accelerate nvidia-ml-py3
 * 1687개의 육류 이미지 사용.
 * 데이터 셋의 범위는 0 ~ 10으로 바뀔 예정이기 때문에 재학습 필수
 # 결과 및 성능
-## 등급 예측
-### CNN
+## 육류 등급 예측
 | Model | # Params | Accuracy |
 |---|---|---|
 |resnetrs152.tf_in1k|86M|0.974|
 |tf_efficientnetv2_l.in21k_ft_in1k|118M|0.977|
-### ViT
-| Model | # Params | Accuracy |
-|---|---|---|
 vit_base_patch32_clip_448.laion2b_ft_in12k_in1k|88M|0.974|
 
 ## 맛 데이터 예측
@@ -99,29 +95,15 @@ vit_base_patch32_clip_448.laion2b_ft_in12k_in1k|88M|0.974|
 | Model | # Params | R2 score | Average acc. |
 |---|---|---|---|
 |resnetrs152.tf_in1k|86M|0.1|0.458|
-### ViT
-| Model | # Params | R2 score | Average acc. |
-|---|---|---|---|
 |vit_base_patch16_clip_224.laion2b_ft_in12k_in1k|88M|0.457|0.596|
 |vit_base_patch32_clip_448.laion2b_ft_in12k_in1k|88M|0.463|0.607|
 ### CoAtNet
-| Model | # Params | R2 score | Average acc. |
-|---|---|---|---|
-### 통계 자료 활용 (add)
-| Model | # Params | R2 score | Average acc. |
-|---|---|---|---|
-
-### 통계 자료 활용 (channel extention)
-| Model | # Params | R2 score | Average acc. |
-|---|---|---|---|
-
-### Feature map ViT
-| Model | # Params | R2 score | Average acc. |
-|---|---|---|---|
-
-### CNN + SE block
-| Model | # Params | R2 score | Average acc. |
-|---|---|---|---|
+| Model | # Params | Average acc. |
+|---|---|---|
+|coat_3_rw_224||0.544|
+|CNN feature + ViT||0.544|
+|grade + cnn feature||0.655|
+|CNN with SE block||0.546
 
 # manage.py Start Argument
 |args|용도|
