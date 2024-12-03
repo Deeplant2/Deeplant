@@ -102,7 +102,7 @@ vit_base_patch32_clip_448.laion2b_ft_in12k_in1k|88M|0.974|
 |---|---|---|
 |coat_3_rw_224||0.544|
 |CNN feature + ViT||0.544|
-|grade + cnn feature||0.655|
+|grade-clor channel + ViT||0.655|
 |CNN with SE block||0.546
 
 # manage.py Start Argument
