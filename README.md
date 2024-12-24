@@ -15,9 +15,10 @@
 
 ![Taste data](img/taste.png)
 
+### 모델 구조조
 
 # Installation
-Ensure you have a python environment, `python=3.8.10` is recommended.
+Ensure you have a python environment, `python=3.8.10` is recommended. \
 cuda를 사용가능한 Nvdia GPU 추천. 
 ```sh
 pip install -r requirement.txt
@@ -62,6 +63,8 @@ pip install transformers datsets accelerate nvidia-ml-py3
 * CoAtNet
 
 # 사용 데이터 셋
+## 예시 이미지
+![example](img/example.png)
 ## 등급 예측
 | Name | Data Type | Range |
 |---|---|---|
@@ -91,19 +94,15 @@ pip install transformers datsets accelerate nvidia-ml-py3
 vit_base_patch32_clip_448.laion2b_ft_in12k_in1k|88M|0.974|
 
 ## 맛 데이터 예측
-### Resnet/ViT
 | Model | # Params | R2 score | Average acc. |
 |---|---|---|---|
 |resnetrs152.tf_in1k|86M|0.1|0.458|
 |vit_base_patch16_clip_224.laion2b_ft_in12k_in1k|88M|0.457|0.596|
 |vit_base_patch32_clip_448.laion2b_ft_in12k_in1k|88M|0.463|0.607|
-### CoAtNet/커스텀 모델
-| Model | # Params | Average acc. |
-|---|---|---|
-|coat_3_rw_224||0.544|
-|CNN feature + ViT||0.544|
-|grade-color channel + ViT||0.655|
-|CNN with SE block||0.546|
+|coat_3_rw_224||0.278|0.544|
+|CNN feature + ViT||0.297|0.544|
+|grade-color channel + ViT||0.524|0.655|
+|CNN with SE block||0.364|0.546|
 
 # manage.py Start Argument
 |args|용도|
