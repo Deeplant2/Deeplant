@@ -91,19 +91,19 @@ pip install transformers datsets accelerate nvidia-ml-py3
 vit_base_patch32_clip_448.laion2b_ft_in12k_in1k|88M|0.974|
 
 ## 맛 데이터 예측
-### CNN
+### Resnet/ViT
 | Model | # Params | R2 score | Average acc. |
 |---|---|---|---|
 |resnetrs152.tf_in1k|86M|0.1|0.458|
 |vit_base_patch16_clip_224.laion2b_ft_in12k_in1k|88M|0.457|0.596|
 |vit_base_patch32_clip_448.laion2b_ft_in12k_in1k|88M|0.463|0.607|
-### CoAtNet
+### CoAtNet/커스텀 모델
 | Model | # Params | Average acc. |
 |---|---|---|
 |coat_3_rw_224||0.544|
 |CNN feature + ViT||0.544|
-|grade-clor channel + ViT||0.655|
-|CNN with SE block||0.546
+|grade-color channel + ViT||0.655|
+|CNN with SE block||0.546|
 
 # manage.py Start Argument
 |args|용도|
